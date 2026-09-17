@@ -492,8 +492,8 @@
 
         <!-- Zone Info Overlay -->
         <div class="zone-info">
-          <div class="zone-info-title">1 zone detected</div>
-          <div class="zone-info-sub">STATIONARY 0m / BTS hopping</div>
+          <div class="zone-info-title" id="zone-count-title">5 locations detected</div>
+          <div class="zone-info-sub" id="zone-count-sub">TRAJECTORY ACTIVE / 5 BTS HOPPING NODES</div>
         </div>
 
         <!-- Leaflet Map -->
@@ -501,7 +501,7 @@
 
         <!-- Coordinates bar -->
         <div class="coords-bar" id="coords-bar">
-          <span>-6.21435</span> | <span>106.92513</span> | <span>215.8</span>
+          <span>-6.21435</span> | <span>106.92513</span> | <span>215.8m</span>
         </div>
 
         <!-- Custom Zoom Controls -->
@@ -520,7 +520,7 @@
 
       <!-- MAP PREVIEW TABLE -->
       <div class="map-preview-section">
-        <div class="map-preview-title">MAP PREVIEW <span class="count">(3)</span></div>
+        <div class="map-preview-title">MAP PREVIEW <span class="count">(5)</span></div>
         <div class="preview-table-wrap">
           <table class="preview-table">
             <thead>
@@ -536,52 +536,11 @@
                 <th>PROVINCE</th>
                 <th>CITY</th>
                 <th>DISTRICT</th>
-                <th>VILLAGE</th>
+                <th>VILLAGE / STREET</th>
               </tr>
             </thead>
-            <tbody>
-              <tr onclick="flyToRow(-6.213731, 106.924577)">
-                <td class="td-no">1</td>
-                <td class="td-dt">2026-08-15 15:58:12</td>
-                <td class="td-coord">-6.213731</td>
-                <td class="td-coord">106.924577</td>
-                <td class="td-coord">-6.213731</td>
-                <td class="td-coord">106.924577</td>
-                <td class="td-op">Telkomsel</td>
-                <td><span class="td-rat">4G</span></td>
-                <td class="td-prov">DKI JAKARTA</td>
-                <td class="td-bold">JAKARTA TIMUR</td>
-                <td>JAKARTA TIMUR-CAKUNG</td>
-                <td>KEL. CAKUNG TIMUR-CAKUNG</td>
-              </tr>
-              <tr onclick="flyToRow(-6.213731, 106.924577)">
-                <td class="td-no">2</td>
-                <td class="td-dt">2026-08-15 15:58:41</td>
-                <td class="td-coord">-6.213731</td>
-                <td class="td-coord">106.924577</td>
-                <td class="td-coord">-6.213731</td>
-                <td class="td-coord">106.924577</td>
-                <td class="td-op">Telkomsel</td>
-                <td><span class="td-rat">4G</span></td>
-                <td class="td-prov">DKI JAKARTA</td>
-                <td class="td-bold">JAKARTA TIMUR</td>
-                <td>JAKARTA TIMUR-CAKUNG</td>
-                <td>KEL. CAKUNG TIMUR-CAKUNG</td>
-              </tr>
-              <tr onclick="flyToRow(-6.21435, 106.92513)">
-                <td class="td-no">3</td>
-                <td class="td-dt">2026-08-15 14:02:30</td>
-                <td class="td-coord">-6.214350</td>
-                <td class="td-coord">106.925130</td>
-                <td class="td-coord">-6.214350</td>
-                <td class="td-coord">106.925130</td>
-                <td class="td-op">Telkomsel</td>
-                <td><span class="td-rat">4G</span></td>
-                <td class="td-prov">DKI JAKARTA</td>
-                <td class="td-bold">JAKARTA TIMUR</td>
-                <td>JAKARTA TIMUR-CAKUNG</td>
-                <td>KEL. CAKUNG TIMUR-CAKUNG</td>
-              </tr>
+            <tbody id="map-preview-tbody">
+              <!-- Dynamically populated 5 points -->
             </tbody>
           </table>
         </div>
@@ -597,111 +556,110 @@
     // ── Dynamic Search ────────────────────────
     setupDynamicSearch('.search-group', '#search-input', '#search-type-select', '#btn-search');
 
-    // ── Target Coordinates (Jakarta Timur - Cakung) ──
-    const TARGET_LAT = -6.21435;
-    const TARGET_LNG = 106.92513;
+    // ── 5 Map Points Datasets ───────────────────
+    const DATASETS = {
+      ayu: {
+        center: [-6.21435, 106.92513],
+        operator: 'Telkomsel',
+        points: [
+          { no: 1, dt: '2026-08-15 15:58:41', lat: -6.214350, lng: 106.925130, prov: 'DKI JAKARTA', city: 'JAKARTA TIMUR', dist: 'CAKUNG', vill: 'KEL. CAKUNG TIMUR (MAIN)', color: '#f59e0b', isPrimary: true },
+          { no: 2, dt: '2026-08-15 15:58:12', lat: -6.213731, lng: 106.924577, prov: 'DKI JAKARTA', city: 'JAKARTA TIMUR', dist: 'CAKUNG', vill: 'KEL. CAKUNG TIMUR', color: '#38bdf8' },
+          { no: 3, dt: '2026-08-15 14:45:00', lat: -6.211820, lng: 106.928100, prov: 'DKI JAKARTA', city: 'JAKARTA TIMUR', dist: 'CAKUNG', vill: 'JL. RAYA BEKASI KM 24', color: '#a855f7' },
+          { no: 4, dt: '2026-08-15 13:20:15', lat: -6.217100, lng: 106.922400, prov: 'DKI JAKARTA', city: 'JAKARTA TIMUR', dist: 'CAKUNG', vill: 'KAWASAN INDUSTRI PULOGADUNG', color: '#22c55e' },
+          { no: 5, dt: '2026-08-15 12:10:05', lat: -6.215900, lng: 106.929800, prov: 'DKI JAKARTA', city: 'JAKARTA TIMUR', dist: 'CAKUNG', vill: 'JL. HAMENGKUBUWONO IX', color: '#eab308' }
+        ]
+      },
+      aimana: {
+        center: [-6.90344, 107.61871],
+        operator: 'XL Axiata',
+        points: [
+          { no: 1, dt: '2026-08-15 16:12:00', lat: -6.903440, lng: 107.618710, prov: 'JAWA BARAT', city: 'BANDUNG', dist: 'BANDUNG WETAN', vill: 'JL. RIAU / BANDUNG WETAN (MAIN)', color: '#f59e0b', isPrimary: true },
+          { no: 2, dt: '2026-08-15 15:30:10', lat: -6.899210, lng: 107.610420, prov: 'JAWA BARAT', city: 'BANDUNG', dist: 'TAMAN SARI', vill: 'TAMAN SARI ATAS', color: '#38bdf8' },
+          { no: 3, dt: '2026-08-15 14:10:45', lat: -6.906110, lng: 107.614300, prov: 'JAWA BARAT', city: 'BANDUNG', dist: 'BANDUNG WETAN', vill: 'JL. DIPONEGORO (GEDUNG SATE)', color: '#a855f7' },
+          { no: 4, dt: '2026-08-15 13:00:20', lat: -6.901500, lng: 107.622500, prov: 'JAWA BARAT', city: 'BANDUNG', dist: 'BANDUNG WETAN', vill: 'JL. CITARUM', color: '#22c55e' },
+          { no: 5, dt: '2026-08-15 11:45:15', lat: -6.895800, lng: 107.617100, prov: 'JAWA BARAT', city: 'BANDUNG', dist: 'COBLONG', vill: 'DAGO ATAS', color: '#eab308' }
+        ]
+      }
+    };
+
+    const activeTargetId = getActiveTargetId() === 'aimana' ? 'aimana' : 'ayu';
+    const currentData = DATASETS[activeTargetId];
 
     // ── Init Leaflet Map ──────────────────────
     const mapInstance = L.map('leaflet-map', {
-      center: [TARGET_LAT, TARGET_LNG],
+      center: currentData.center,
       zoom: 14,
       zoomControl: false,
       attributionControl: false
     });
 
-    // Tile Layers (Esri Dark Gray - Clean dark map without watermarks)
-    const darkBaseLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom: 16,
-      attribution: ''
-    });
-    const darkRefLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom: 16,
-      attribution: ''
-    });
+    // Tile Layers (Esri Dark Gray)
+    const darkBaseLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 });
+    const darkRefLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 });
     const darkTileLayer = L.layerGroup([darkBaseLayer, darkRefLayer]);
+    const satelliteTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 });
+    const streetTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 });
 
-    const satelliteTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom: 18,
-      attribution: ''
-    });
-
-    const streetTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom: 18,
-      attribution: ''
-    });
-
-    // Default layer: Dark tiles
     darkTileLayer.addTo(mapInstance);
     let currentTileLayer = darkTileLayer;
 
-    // ── Custom Markers & Overlays ──────────────
-    const orangeIcon = L.divIcon({
-      html: `<div style="
-        width: 18px; height: 18px;
-        background: #f59e0b;
-        border: 3px solid rgba(245,158,11,0.6);
-        border-radius: 50%;
-        box-shadow: 0 0 16px rgba(245,158,11,0.9), 0 0 4px rgba(245,158,11,1);
-        position: relative;
-      ">
-        <div style="
-          position: absolute;
-          inset: -8px;
+    // ── Render 5 Markers & Path ─────────────────
+    const pathCoords = [];
+    const markerGroup = L.featureGroup();
+
+    currentData.points.forEach((pt) => {
+      pathCoords.push([pt.lat, pt.lng]);
+
+      const isPrimary = pt.isPrimary;
+      const markerSize = isPrimary ? 18 : 13;
+      const anchorSize = markerSize / 2;
+
+      const markerIcon = L.divIcon({
+        html: `<div style="
+          width: ${markerSize}px; height: ${markerSize}px;
+          background: ${pt.color};
+          border: 2.5px solid rgba(255,255,255,0.85);
           border-radius: 50%;
-          border: 1.5px solid rgba(245,158,11,0.4);
-          animation: pulse-ring 1.8s ease-out infinite;
-        "></div>
-      </div>`,
-      className: '',
-      iconSize: [18, 18],
-      iconAnchor: [9, 9]
+          box-shadow: 0 0 14px ${pt.color}, 0 0 4px ${pt.color};
+          position: relative;
+        ">
+          ${isPrimary ? `<div style="
+            position: absolute;
+            inset: -9px;
+            border-radius: 50%;
+            border: 1.5px solid ${pt.color};
+            animation: pulse-ring 1.8s ease-out infinite;
+          "></div>` : ''}
+        </div>`,
+        className: '',
+        iconSize: [markerSize, markerSize],
+        iconAnchor: [anchorSize, anchorSize]
+      });
+
+      const m = L.marker([pt.lat, pt.lng], { icon: markerIcon }).addTo(mapInstance);
+      m.bindPopup(`
+        <div style="font-family: Inter, sans-serif; font-size: 12px; color: #000; padding: 3px;">
+          <strong style="color: ${pt.color === '#f59e0b' ? '#d97706' : pt.color};">Titik #${pt.no} – ${currentData.operator} BTS</strong><br/>
+          <span>${pt.vill}, ${pt.city}</span><br/>
+          <span style="font-size: 10px; color: #555;">${pt.lat.toFixed(6)}, ${pt.lng.toFixed(6)} | ${pt.dt}</span>
+        </div>
+      `);
+      markerGroup.addLayer(m);
     });
 
-    const mainMarker = L.marker([TARGET_LAT, TARGET_LNG], { icon: orangeIcon }).addTo(mapInstance);
-    mainMarker.bindPopup(`
-      <div style="font-family: Inter, sans-serif; font-size: 12px; color: #000; padding: 2px;">
-        <strong style="color: #e2001a;">Telkomsel 4G BTS</strong><br/>
-        Jakarta Timur - Cakung<br/>
-        <span style="font-size: 10px; color: #555;">-6.214350, 106.925130</span>
-      </div>
-    `);
+    markerGroup.addTo(mapInstance);
 
-    // Secondary marker
-    const orangeIcon2 = L.divIcon({
-      html: `<div style="
-        width: 12px; height: 12px;
-        background: #38bdf8;
-        border: 2px solid rgba(56,189,248,0.6);
-        border-radius: 50%;
-        box-shadow: 0 0 10px rgba(56,189,248,0.8);
-      "></div>`,
-      className: '',
-      iconSize: [12, 12],
-      iconAnchor: [6, 6]
-    });
-    const secondaryMarker = L.marker([-6.213731, 106.924577], { icon: orangeIcon2 }).addTo(mapInstance);
-    secondaryMarker.bindPopup(`
-      <div style="font-family: Inter, sans-serif; font-size: 12px; color: #000; padding: 2px;">
-        <strong style="color: #0284c7;">Point 2 (Tower 4G)</strong><br/>
-        Kel. Cakung Timur<br/>
-        <span style="font-size: 10px; color: #555;">-6.213731, 106.924577</span>
-      </div>
-    `);
-
-    // ── Polyline Path ─────────────────────────
-    const pathLine = L.polyline([
-      [-6.21435, 106.92513],
-      [-6.213731, 106.924577]
-    ], {
+    // Connected Polyline Trajectory Path
+    const pathLine = L.polyline(pathCoords, {
       color: '#f59e0b',
       weight: 2.5,
       dashArray: '6 4',
-      opacity: 0.8
+      opacity: 0.85
     }).addTo(mapInstance);
 
-    // ── Radius Circles ─────────────────────────
-    const outerCircle = L.circle([TARGET_LAT, TARGET_LNG], {
-      radius: 350,
+    // Coverage Radius Circle around Primary Target
+    const outerCircle = L.circle(currentData.points[0].lat ? [currentData.points[0].lat, currentData.points[0].lng] : currentData.center, {
+      radius: 400,
       color: '#f59e0b',
       fillColor: '#f59e0b',
       fillOpacity: 0.08,
@@ -710,8 +668,8 @@
       opacity: 0.6
     }).addTo(mapInstance);
 
-    const innerCircle = L.circle([TARGET_LAT, TARGET_LNG], {
-      radius: 120,
+    const innerCircle = L.circle(currentData.points[0].lat ? [currentData.points[0].lat, currentData.points[0].lng] : currentData.center, {
+      radius: 140,
       color: '#f59e0b',
       fillColor: '#f59e0b',
       fillOpacity: 0.2,
@@ -719,7 +677,31 @@
       opacity: 0.7
     }).addTo(mapInstance);
 
-    // ── Coordinates display on mouse move ─────
+    // Auto-fit map to show all 5 markers nicely
+    mapInstance.fitBounds(pathLine.getBounds().pad(0.25));
+
+    // Render 5 Rows in Preview Table
+    const tbody = document.getElementById('map-preview-tbody');
+    if (tbody) {
+      tbody.innerHTML = currentData.points.map(pt => `
+        <tr onclick="flyToRow(${pt.lat}, ${pt.lng})" style="cursor:pointer;">
+          <td class="td-no">${pt.no}</td>
+          <td class="td-dt">${pt.dt}</td>
+          <td class="td-coord">${pt.lat.toFixed(6)}</td>
+          <td class="td-coord">${pt.lng.toFixed(6)}</td>
+          <td class="td-coord">${pt.lat.toFixed(6)}</td>
+          <td class="td-coord">${pt.lng.toFixed(6)}</td>
+          <td class="td-op">${currentData.operator}</td>
+          <td><span class="td-rat">4G</span></td>
+          <td class="td-prov">${pt.prov}</td>
+          <td class="td-bold">${pt.city}</td>
+          <td>${pt.dist}</td>
+          <td>${pt.vill}</td>
+        </tr>
+      `).join('');
+    }
+
+    // ── Mousemove Coordinates Display ─────────────
     mapInstance.on('mousemove', function(e) {
       const bar = document.getElementById('coords-bar');
       if (bar) {
@@ -729,7 +711,7 @@
 
     // ── Helper Functions ──────────────────────
     function focusMarker() {
-      mapInstance.flyTo([TARGET_LAT, TARGET_LNG], 15, { duration: 0.8 });
+      mapInstance.flyTo(currentData.center, 15, { duration: 0.8 });
     }
 
     function flyToRow(lat, lng) {
@@ -745,12 +727,11 @@
       }
     }
 
-    // ── Control Button Handler ────────────────
+    // ── Control Button Handlers ────────────────
     document.querySelectorAll('.map-ctrl-btn').forEach(btn => {
       btn.addEventListener('click', function() {
         const id = this.id;
 
-        // View modes: 2D vs 3D vs Satellite
         if (id === 'ctrl-2d') {
           document.querySelectorAll('#ctrl-2d, #ctrl-3d, #ctrl-satellite').forEach(b => b.classList.replace('active','inactive'));
           this.classList.replace('inactive','active');
@@ -771,7 +752,6 @@
           currentTileLayer = streetTileLayer;
         }
 
-        // Overlay Toggles
         if (id === 'ctrl-path') {
           const isActive = this.classList.contains('active');
           this.classList.toggle('active', !isActive);

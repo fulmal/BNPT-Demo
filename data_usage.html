@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Usage Activities | BNPT Intelligence Platform</title>
+  <meta name="description" content="Data Usage Activities Telemetry & Logs - BNPT Intelligence Platform." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="profile.css" />
+  <style>
+    /* ── DATA USAGE ACTIVITIES PAGE STYLES ───── */
+    .data-usage-page {
+      margin-left: var(--sidebar-w);
+      padding: 20px 24px 48px;
+      min-height: calc(100vh - var(--topbar-h) - var(--tabs-h));
+      width: calc(100% - var(--sidebar-w));
+    }
+
+    /* Source & Filter Header Box */
+    .filter-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .filter-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .filter-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    .date-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #0d121a;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .date-input-wrap input {
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    /* Metric Cards Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 100px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .metric-card:hover {
+      border-color: rgba(0, 200, 160, 0.4);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+    .metric-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .metric-title {
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .metric-icon {
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+    .metric-value {
+      font-family: var(--mono);
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-top: 10px;
+    }
+
+    /* Main 2-Column Content Layout */
+    .activities-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    /* Section Container Card */
+    .activity-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+    }
+    .activity-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .activity-card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .live-tag {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .stale-badge {
+      background: rgba(255, 77, 99, 0.15);
+      color: #ff4d63;
+      border: 1px solid rgba(255, 77, 99, 0.3);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    /* Progress Items for Data Volume Distribution */
+    .dist-item {
+      margin-bottom: 22px;
+    }
+    .dist-item:last-child { margin-bottom: 0; }
+    .dist-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+    .dist-label {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    .dist-stats {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .dist-size {
+      font-family: var(--mono);
+      font-weight: 700;
+      color: var(--text-primary);
+      font-size: 12px;
+    }
+    .dist-pct {
+      font-family: var(--mono);
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #a855f7, #c084fc);
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+
+    /* Logs List */
+    .logs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .log-item {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .log-time {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+    .log-content {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .log-title {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .log-node {
+      font-size: 11px;
+      font-family: var(--mono);
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ───────────────── TOPBAR ───────────────── -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="logo-wrap" style="cursor: pointer;" onclick="window.location.href='search.html'">
+        <div class="logo-emblem">
+          <img src="images/bnpt_logo.png" alt="BNPT Logo" style="width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 0 4px rgba(226,0,26,0.3));" />
+        </div>
+      </div>
+    </div>
+
+    <div class="topbar-search">
+      <button class="btn-back" onclick="window.location.href='search.html'">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M8.5 1L3 6.5l5.5 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back to results
+      </button>
+      <div class="search-group active">
+        <select class="search-type-select" id="search-type-select" aria-label="Search Type">
+          <option value="name">Name</option>
+          <option value="phone" selected>Phone Number</option>
+          <option value="kk">KK Number</option>
+        </select>
+        <div class="search-input-wrap">
+          <svg class="search-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M9.5 9.5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input type="text" id="search-input" class="search-input" value="+6281293949502" placeholder="Search phone number..." />
+        </div>
+        <button class="btn-search" id="btn-search">SEARCH</button>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <div class="retrieval-info">
+        <span class="retrieval-label">Retrieved on</span>
+        <span class="retrieval-date" id="retrieval-date">Aug 15, 2026, 05:30 PM</span>
+      </div>
+      <button class="btn-fullscreen" id="btn-fullscreen" onclick="toggleFullScreen()" title="Fullscreen Mode (F11)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+        </svg>
+        <span class="fs-text">Fullscreen</span>
+      </button>
+      <button class="btn-export">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v7M4 5.5l2.5 2.5 2.5-2.5M1 10.5v.5a1 1 0 001 1h9a1 1 0 001-1v-.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Export Data
+      </button>
+    </div>
+  </header>
+
+  <!-- ───────────────── MAIN TABS ───────────────── -->
+  <nav class="tab-nav" role="navigation">
+    <div class="tab-nav-inner">
+      <button class="tab-btn" onclick="window.location.href='profile_phone.html'">Profile Overview</button>
+      <button class="tab-btn" onclick="window.location.href='index.html'">Family Card</button>
+      <button class="tab-btn" onclick="window.location.href='phone_detail.html'">Phone Detail</button>
+      <button class="tab-btn" onclick="window.location.href='map_review.html'">Map Review</button>
+      <button class="tab-btn" onclick="window.location.href='cellular_history.html'">Cellular History</button>
+      <button class="tab-btn" onclick="window.location.href='whatsapp_detail.html'">WhatsApp Detail</button>
+      <button class="tab-btn active" id="tab-data">Data Usage Activities</button>
+      <button class="tab-btn" onclick="window.location.href='link_analysis.html'">Link Analysis</button>
+      <button class="tab-btn" onclick="window.location.href='ai_analysis.html'">AI Analysis</button>
+    </div>
+    <div class="secure-badge">
+      <span class="pulse-dot"></span>
+      SECURE TELEMETRY LINKED
+    </div>
+  </nav>
+
+  <!-- ───────────────── LAYOUT ───────────────── -->
+  <div style="padding-top: calc(var(--topbar-h) + var(--tabs-h)); display:flex; min-height:100vh;">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <button class="sidebar-icon active" title="Search">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="7.5" cy="7.5" r="5" stroke="currentColor" stroke-width="1.6"/><path d="M12 12l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <button class="sidebar-icon" title="Folders">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 5a1 1 0 011-1h5l1.5 2H15a1 1 0 011 1v7a1 1 0 01-1 1H3a1 1 0 01-1-1V5z" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+      <button class="sidebar-icon" title="Analytics">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="9" width="4" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="7" y="5" width="4" height="11" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="12" y="2" width="4" height="14" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+      <button class="sidebar-icon" title="Reports">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 2h7l4 4v10a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5"/><path d="M11 2v4h4M6 9h6M6 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="sidebar-spacer"></div>
+      <button class="sidebar-icon" title="Help">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M9 10v1M9 7a2 2 0 110 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <button class="sidebar-icon" title="Settings">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M9 1v2M9 15v2M1 9h2M15 9h2M3.22 3.22l1.42 1.42M13.36 13.36l1.42 1.42M3.22 14.78l1.42-1.42M13.36 4.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </aside>
+
+    <!-- MAIN DATA USAGE CONTENT -->
+    <main class="data-usage-page">
+
+      <!-- FILTER PANEL -->
+      <div class="filter-panel">
+        <div class="filter-row">
+          <div class="filter-group">
+            <span class="filter-label">SOURCE</span>
+            <span class="source-badge">
+              <span class="dot-green"></span>
+              Telco Dataset (v1) · Ready
+            </span>
+          </div>
+          <div class="filter-group">
+            <button class="source-icon-btn" title="Info"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M6.5 5.5v4.5M6.5 3.8v.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+            <button class="source-icon-btn" title="Refresh"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1 6.5A5.5 5.5 0 1012 6.5M1 3v3.5h3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
+        </div>
+
+        <div class="filter-row" style="margin-top: 4px;">
+          <div class="filter-group">
+            <span class="filter-label">DATE RANGE</span>
+            <div class="date-input-wrap">
+              <input type="text" value="dd/mm/yyyy" placeholder="dd/mm/yyyy" id="start-date" />
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="2.5" width="10" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 5.5h10M4 1v3M9 1v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </div>
+            <span style="color: var(--text-muted); font-size: 12px;">-</span>
+            <div class="date-input-wrap">
+              <input type="text" value="dd/mm/yyyy" placeholder="dd/mm/yyyy" id="end-date" />
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="2.5" width="10" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 5.5h10M4 1v3M9 1v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- METRICS GRID -->
+      <div class="metrics-grid">
+        <!-- Metric 1: Active Hours -->
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">ACTIVE HOURS</span>
+            <svg class="metric-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </div>
+          <div class="metric-value" id="val-active-hours">18 / 24</div>
+        </div>
+
+        <!-- Metric 2: Peak Hour -->
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">PEAK HOUR</span>
+            <svg class="metric-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M9 1.5L2.5 9h5.5l-1 5.5 6.5-7.5H8l1-5.5z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="metric-value" id="val-peak-hour">21:00</div>
+        </div>
+
+        <!-- Metric 3: Daily Events -->
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">DAILY EVENTS</span>
+            <svg class="metric-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1.5 8h3l2-4.5 3 9 2-4.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="metric-value" id="val-daily-events">1,420</div>
+        </div>
+
+        <!-- Metric 4: Location Pings -->
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-title">LOCATION PINGS</span>
+            <svg class="metric-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5c-2.8 0-5 2.2-5 5 0 3.8 5 8 5 8s5-4.2 5-8c0-2.8-2.2-5-5-5z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6.5" r="1.8" stroke="currentColor" stroke-width="1.3"/></svg>
+          </div>
+          <div class="metric-value" id="val-location-pings">128</div>
+        </div>
+      </div>
+
+      <!-- MAIN 2-COLUMN LAYOUT -->
+      <div class="activities-layout">
+
+        <!-- LEFT CARD: Data Volume Distribution -->
+        <div class="activity-card">
+          <div class="activity-card-header">
+            <span class="activity-card-title">Data Volume Distribution</span>
+            <span class="live-tag">
+              <span class="pulse-dot"></span>
+              Live Metrics
+            </span>
+          </div>
+
+          <div class="dist-item">
+            <div class="dist-info">
+              <span class="dist-label">Mobile Data Load</span>
+              <div class="dist-stats">
+                <span class="dist-size" id="size-mobile">48.5 MB</span>
+                <span class="dist-pct" id="pct-mobile">65.0%</span>
+              </div>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="bar-mobile" style="width: 65%;"></div>
+            </div>
+          </div>
+
+          <div class="dist-item">
+            <div class="dist-info">
+              <span class="dist-label">Encrypted Tunneling</span>
+              <div class="dist-stats">
+                <span class="dist-size" id="size-tunnel">12.4 MB</span>
+                <span class="dist-pct" id="pct-tunnel">28.0%</span>
+              </div>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="bar-tunnel" style="width: 28%;"></div>
+            </div>
+          </div>
+
+          <div class="dist-item">
+            <div class="dist-info">
+              <span class="dist-label">Auxiliary Handshake</span>
+              <div class="dist-stats">
+                <span class="dist-size" id="size-aux">1.2 MB</span>
+                <span class="dist-pct" id="pct-aux">7.0%</span>
+              </div>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="bar-aux" style="width: 7%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT CARD: Realtime Data Usage Logs -->
+        <div class="activity-card">
+          <div class="activity-card-header">
+            <span class="activity-card-title">Realtime Data Usage Logs</span>
+            <span class="stale-badge" id="logs-badge">STALE</span>
+          </div>
+
+          <div class="logs-list" id="logs-list">
+            <div class="log-item">
+              <span class="log-time">21:24:01</span>
+              <div class="log-content">
+                <span class="log-title">Connection Timeout / Handshake Expired</span>
+                <span class="log-node">Node: BTS Cakung_1</span>
+              </div>
+            </div>
+            <div class="log-item">
+              <span class="log-time">21:20:15</span>
+              <div class="log-content">
+                <span class="log-title">Telemetry Sync Stopped</span>
+                <span class="log-node">Node: BTS Cakung_1</span>
+              </div>
+            </div>
+            <div class="log-item">
+              <span class="log-time">21:18:44</span>
+              <div class="log-content">
+                <span class="log-title">No valid payload packet detected</span>
+                <span class="log-node">Node: N/A</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <script src="search_logic.js"></script>
+  <script>
+    // Dynamic Dataset adaptation based on query
+    function updateDataUsageContent() {
+      const input = document.querySelector('#search-input');
+      const select = document.querySelector('#search-type-select');
+      const query = (input ? input.value : '').trim().toLowerCase();
+
+      // Elements
+      const activeHours = document.querySelector('#val-active-hours');
+      const peakHour = document.querySelector('#val-peak-hour');
+      const dailyEvents = document.querySelector('#val-daily-events');
+      const locationPings = document.querySelector('#val-location-pings');
+      const sizeMobile = document.querySelector('#size-mobile');
+      const sizeTunnel = document.querySelector('#size-tunnel');
+      const sizeAux = document.querySelector('#size-aux');
+      const pctMobile = document.querySelector('#pct-mobile');
+      const pctTunnel = document.querySelector('#pct-tunnel');
+      const pctAux = document.querySelector('#pct-aux');
+      const barMobile = document.querySelector('#bar-mobile');
+      const barTunnel = document.querySelector('#bar-tunnel');
+      const barAux = document.querySelector('#bar-aux');
+      const logsList = document.querySelector('#logs-list');
+
+      if (query.includes('ismail') || query.includes('3273092008106277')) {
+        // Ismail / Idle state matching user's default screenshot
+        if (activeHours) activeHours.textContent = '0 / 24';
+        if (peakHour) peakHour.textContent = '-';
+        if (dailyEvents) dailyEvents.textContent = '0';
+        if (locationPings) locationPings.textContent = '0';
+        if (sizeMobile) sizeMobile.textContent = '2.5 MB';
+        if (pctMobile) pctMobile.textContent = '0.0%';
+        if (barMobile) barMobile.style.width = '100%';
+        if (sizeTunnel) sizeTunnel.textContent = '711.8 KB';
+        if (pctTunnel) pctTunnel.textContent = '0.0%';
+        if (barTunnel) barTunnel.style.width = '55%';
+        if (sizeAux) sizeAux.textContent = '48.2 KB';
+        if (pctAux) pctAux.textContent = '0.0%';
+        if (barAux) barAux.style.width = '15%';
+
+        if (logsList) {
+          logsList.innerHTML = `
+            <div class="log-item">
+              <span class="log-time">21:24:01</span>
+              <div class="log-content">
+                <span class="log-title">Connection Timeout / Handshake Expired</span>
+                <span class="log-node">Node: BTS Depok_3</span>
+              </div>
+            </div>
+            <div class="log-item">
+              <span class="log-time">21:20:15</span>
+              <div class="log-content">
+                <span class="log-title">Telemetry Sync Stopped</span>
+                <span class="log-node">Node: BTS Depok_3</span>
+              </div>
+            </div>
+            <div class="log-item">
+              <span class="log-time">21:18:44</span>
+              <div class="log-content">
+                <span class="log-title">No valid payload packet detected</span>
+                <span class="log-node">Node: N/A</span>
+              </div>
+            </div>
+          `;
+        }
+      } else if (query.includes('aimana') || query.includes('3273092510920002') || query.includes('6287781085549')) {
+        // Aimana Ilman Aulia
+        if (activeHours) activeHours.textContent = '14 / 24';
+        if (peakHour) peakHour.textContent = '19:30';
+        if (dailyEvents) dailyEvents.textContent = '842';
+        if (locationPings) locationPings.textContent = '64';
+        if (sizeMobile) sizeMobile.textContent = '32.1 MB';
+        if (pctMobile) pctMobile.textContent = '58.0%';
+        if (barMobile) barMobile.style.width = '58%';
+        if (sizeTunnel) sizeTunnel.textContent = '18.4 MB';
+        if (pctTunnel) pctTunnel.textContent = '33.0%';
+        if (barTunnel) barTunnel.style.width = '33%';
+        if (sizeAux) sizeAux.textContent = '5.0 MB';
+        if (pctAux) pctAux.textContent = '9.0%';
+        if (barAux) barAux.style.width = '9%';
+
+        if (logsList) {
+          logsList.innerHTML = `
+            <div class="log-item">
+              <span class="log-time">19:30:12</span>
+              <div class="log-content">
+                <span class="log-title">High Volume Encrypted Tunnel Activity</span>
+                <span class="log-node">Node: BTS Bandung_Central</span>
+              </div>
+            </div>
+            <div class="log-item">
+              <span class="log-time">19:15:00</span>
+              <div class="log-content">
+                <span class="log-title">Cellular Tower Handover Confirmed</span>
+                <span class="log-node">Node: BTS Bandung_South</span>
+              </div>
+            </div>
+            <div class="log-item">
+              <span class="log-time">18:45:22</span>
+              <div class="log-content">
+                <span class="log-title">Telemetry Heartbeat Verified</span>
+                <span class="log-node">Node: BTS Bandung_Central</span>
+              </div>
+            </div>
+          `;
+        }
+      } else {
+        // Phone +6281293949502 / Raisa / Default Active Target
+        if (activeHours) activeHours.textContent = '18 / 24';
+        if (peakHour) peakHour.textContent = '21:00';
+        if (dailyEvents) dailyEvents.textContent = '1,420';
+        if (locationPings) locationPings.textContent = '128';
+        if (sizeMobile) sizeMobile.textContent = '48.5 MB';
+        if (pctMobile) pctMobile.textContent = '65.0%';
+        if (barMobile) barMobile.style.width = '65%';
+        if (sizeTunnel) sizeTunnel.textContent = '12.4 MB';
+        if (pctTunnel) pctTunnel.textContent = '28.0%';
+        if (barTunnel) barTunnel.style.width = '28%';
+        if (sizeAux) sizeAux.textContent = '1.2 MB';
+        if (pctAux) pctAux.textContent = '7.0%';
+        if (barAux) barAux.style.width = '7%';
+
+        if (logsList) {
+          logsList.innerHTML = `
+            <div class="log-item">
+              <span class="log-time">21:24:01</span>
+              <div class="log-content">
+                <span class="log-title">Connection Timeout / Handshake Expired</span>
+                <span class="log-node">Node: BTS Cakung_1</span>
+              </div>
+            </div>
+            <div class="log-item">
+              <span class="log-time">21:20:15</span>
+              <div class="log-content">
+                <span class="log-title">Telemetry Sync Stopped</span>
+                <span class="log-node">Node: BTS Cakung_1</span>
+              </div>
+            </div>
+            <div class="log-item">
+              <span class="log-time">21:18:44</span>
+              <div class="log-content">
+                <span class="log-title">Packet payload transferred (4.2 MB)</span>
+                <span class="log-node">Node: BTS Cakung_1</span>
+              </div>
+            </div>
+          `;
+        }
+      }
+    }
+
+    setupDynamicSearch('.search-group', '#search-input', '#search-type-select', '#btn-search');
+    updateDataUsageContent();
+  </script>
+</body>
+</html>

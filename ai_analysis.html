@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Analysis Report | BNPT Intelligence Platform</title>
+  <meta name="description" content="Laporan Analisis Aktivitas Target AI - BNPT Intelligence Platform." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="profile.css" />
+  <!-- Leaflet CSS for Satellite Map Card -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    /* ── AI ANALYSIS PAGE STYLES ───── */
+    .ai-analysis-page {
+      margin-left: var(--sidebar-w);
+      padding: 20px 24px 48px;
+      min-height: calc(100vh - var(--topbar-h) - var(--tabs-h));
+      width: calc(100% - var(--sidebar-w));
+    }
+
+    /* Top Action Bar */
+    .ai-action-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .date-badge-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-family: var(--mono);
+      color: var(--text-primary);
+    }
+    .btn-action-group {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-copy-report {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+    .btn-copy-report:hover { background: rgba(255,255,255,0.1); }
+    .btn-export-pdf {
+      background: var(--accent);
+      border: none;
+      color: #0a1208;
+      border-radius: 6px;
+      padding: 8px 18px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .btn-export-pdf:hover {
+      background: #00e0b5;
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    /* Main Container Report Box */
+    .report-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* Report Header */
+    .report-header-sub {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .report-meta-text {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .report-title-h1 {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: 0.02em;
+      margin-bottom: 4px;
+    }
+    .report-period-text {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* Section Header Title */
+    .ai-sec-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .ai-tag-badge {
+      background: rgba(0, 200, 160, 0.1);
+      border: 1px solid rgba(0, 200, 160, 0.3);
+      color: var(--accent);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+
+    /* Section 1: BLUF Insight Box */
+    .bluf-box {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 16px 18px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      margin-bottom: 18px;
+    }
+    .bluf-box strong { color: var(--text-primary); }
+
+    /* 4 Key Cards Grid */
+    .ai-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .ai-key-card {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .ai-key-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: rgba(0, 200, 160, 0.08);
+      border: 1px solid rgba(0, 200, 160, 0.2);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .ai-key-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow: hidden;
+    }
+    .ai-key-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .ai-key-val {
+      font-family: var(--mono);
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+    .ai-key-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Section 2: Analysis Sub-blocks (Text Left + Visual Card Right) */
+    .analysis-block {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 24px;
+      align-items: start;
+      margin-bottom: 24px;
+
+    }
+    .analysis-block:last-child { margin-bottom: 0; }
+
+    .analysis-text-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .analysis-sub-heading {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .analysis-para {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Visual Card Right Styling */
+    .analysis-visual-card {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Communication Stats Widget */
+    .comm-stats-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .comm-stat-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .comm-stat-num {
+      font-family: var(--mono);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .comm-stat-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Satellite Map Card */
+    .satellite-map-wrap {
+      width: 100%;
+      height: 140px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+      position: relative;
+    }
+    #satMap {
+      width: 100%;
+      height: 100%;
+    }
+    .map-legend-overlay {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(14, 18, 26, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 10.5px;
+      z-index: 1000;
+    }
+
+    /* Device Transition Widget */
+    .device-transition-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 6px;
+    }
+    .dev-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .dev-name {
+      font-weight: 700;
+      font-size: 12.5px;
+      color: var(--text-primary);
+    }
+    .dev-dates {
+      font-size: 10px;
+      font-family: var(--mono);
+      color: var(--text-muted);
+    }
+
+    /* App Usage Progress Card */
+    .app-progress-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .app-progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+    .app-name { color: var(--text-secondary); }
+    .app-size { font-family: var(--mono); font-weight: 700; color: var(--text-primary); }
+
+    /* Section 3: Lampiran Tables */
+    .attachment-table-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+    }
+    .attachment-table-wrap {
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .attachment-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .attachment-table th {
+      text-align: left;
+      padding: 8px 12px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .attachment-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      color: var(--text-secondary);
+      vertical-align: middle;
+    }
+    .attachment-table tbody tr:last-child td { border-bottom: none; }
+    .attachment-table tbody tr:hover { background: rgba(0, 200, 160, 0.03); }
+    .td-event-out { color: var(--text-primary); font-weight: 500; }
+  </style>
+</head>
+<body>
+
+  <!-- ───────────────── TOPBAR ───────────────── -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="logo-wrap" style="cursor: pointer;" onclick="window.location.href='search.html'">
+        <div class="logo-emblem">
+          <img src="images/bnpt_logo.png" alt="BNPT Logo" style="width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 0 4px rgba(226,0,26,0.3));" />
+        </div>
+      </div>
+    </div>
+
+    <div class="topbar-search">
+      <button class="btn-back" onclick="window.location.href='search.html'">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M8.5 1L3 6.5l5.5 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back to results
+      </button>
+      <div class="search-group active">
+        <select class="search-type-select" id="search-type-select" aria-label="Search Type">
+          <option value="name">Name</option>
+          <option value="phone" selected>Phone Number</option>
+          <option value="kk">KK Number</option>
+        </select>
+        <div class="search-input-wrap">
+          <svg class="search-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M9.5 9.5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input type="text" id="search-input" class="search-input" value="+6281293949502" placeholder="Search phone number..." />
+        </div>
+        <button class="btn-search" id="btn-search">SEARCH</button>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <div class="retrieval-info">
+        <span class="retrieval-label">Retrieved on</span>
+        <span class="retrieval-date" id="retrieval-date">Aug 15, 2026, 05:30 PM</span>
+      </div>
+      <button class="btn-fullscreen" id="btn-fullscreen" onclick="toggleFullScreen()" title="Fullscreen Mode (F11)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+        </svg>
+        <span class="fs-text">Fullscreen</span>
+      </button>
+      <button class="btn-export">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v7M4 5.5l2.5 2.5 2.5-2.5M1 10.5v.5a1 1 0 001 1h9a1 1 0 001-1v-.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Export Data
+      </button>
+    </div>
+  </header>
+
+  <!-- ───────────────── MAIN TABS ───────────────── -->
+  <nav class="tab-nav" role="navigation">
+    <div class="tab-nav-inner">
+      <button class="tab-btn" onclick="window.location.href='profile_phone.html'">Profile Overview</button>
+      <button class="tab-btn" onclick="window.location.href='index.html'">Family Card</button>
+      <button class="tab-btn" onclick="window.location.href='phone_detail.html'">Phone Detail</button>
+      <button class="tab-btn" onclick="window.location.href='map_review.html'">Map Review</button>
+      <button class="tab-btn" onclick="window.location.href='cellular_history.html'">Cellular History</button>
+      <button class="tab-btn" onclick="window.location.href='whatsapp_detail.html'">WhatsApp Detail</button>
+      <button class="tab-btn" onclick="window.location.href='data_usage.html'">Data Usage Activities</button>
+      <button class="tab-btn" onclick="window.location.href='link_analysis.html'">Link Analysis</button>
+      <button class="tab-btn active" id="tab-ai">AI Analysis</button>
+    </div>
+    <div class="secure-badge">
+      <span class="pulse-dot"></span>
+      SECURE TELEMETRY LINKED
+    </div>
+  </nav>
+
+  <!-- ───────────────── LAYOUT ───────────────── -->
+  <div style="padding-top: calc(var(--topbar-h) + var(--tabs-h)); display:flex; min-height:100vh;">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <button class="sidebar-icon active" title="Search">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="7.5" cy="7.5" r="5" stroke="currentColor" stroke-width="1.6"/><path d="M12 12l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <button class="sidebar-icon" title="Folders">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 5a1 1 0 011-1h5l1.5 2H15a1 1 0 011 1v7a1 1 0 01-1 1H3a1 1 0 01-1-1V5z" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+      <button class="sidebar-icon" title="Analytics">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="9" width="4" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="7" y="5" width="4" height="11" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="12" y="2" width="4" height="14" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+      <button class="sidebar-icon" title="Reports">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 2h7l4 4v10a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5"/><path d="M11 2v4h4M6 9h6M6 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="sidebar-spacer"></div>
+      <button class="sidebar-icon" title="Help">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M9 10v1M9 7a2 2 0 110 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <button class="sidebar-icon" title="Settings">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M9 1v2M9 15v2M1 9h2M15 9h2M3.22 3.22l1.42 1.42M13.36 13.36l1.42 1.42M3.22 14.78l1.42-1.42M13.36 4.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </aside>
+
+    <!-- MAIN AI ANALYSIS CONTENT -->
+    <main class="ai-analysis-page">
+
+      <!-- TOP ACTION BAR -->
+      <div class="ai-action-bar">
+        <div class="date-badge-btn">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="2.5" width="11" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M1.5 5.5h11M4.5 1v3M9.5 1v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          25/07/2026 - 11/08/2026
+        </div>
+
+        <div class="btn-action-group">
+          <button class="btn-copy-report">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="4.5" y="4.5" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M2.5 8.5h-1a1 1 0 01-1-1v-6a1 1 0 011-1h6a1 1 0 011 1v1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            COPY REPORT
+          </button>
+          <button class="btn-export-pdf">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v7M4 5.5l2.5 2.5 2.5-2.5M1 10.5v.5a1 1 0 001 1h9a1 1 0 001-1v-.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            EXPORT PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- MAIN REPORT CARD CONTAINER -->
+      <div class="report-card">
+
+        <!-- REPORT HEADER -->
+        <div>
+          <div class="report-header-sub">AI ANALYSIS REPORT</div>
+          <div class="report-meta-text">Target: 6281293949502 &nbsp;|&nbsp; Analysis Period: 25 Juli – 11 Agustus 2026 &nbsp;|&nbsp; Generated: 18 Aug 2026 02:04 PM</div>
+          <div class="report-title-h1" id="rep-title">LAPORAN ANALISIS AKTIVITAS TARGET 6281293949502</div>
+          <div style="display:flex; align-items:center; gap:12px; margin-top:4px;">
+            <span class="report-period-text">Periode Analisis 25 Juli – 11 Agustus 2026</span>
+            <span style="font-size:11.5px; color:var(--text-muted);">AI Generated • Analyst Review Required</span>
+          </div>
+        </div>
+
+        <!-- SECTION 1: AI INSIGHT -->
+        <div>
+          <div class="ai-sec-title">
+            <span>1. AI INSIGHT</span>
+            <span class="ai-tag-badge">🤖 AI GENERATED - ANALYST REVIEW REQUIRED</span>
+          </div>
+
+          <!-- BLUF Box -->
+          <div class="bluf-box" id="bluf-text">
+            <strong>BLUF</strong> — Selama 25 Juli – 11 Agustus 2026, target tercatat berkomunikasi dengan 3 nomor. Nomor 6281316418057 paling banyak muncul dengan 3 komunikasi keluar. Dua aktivitas tercatat di Cakung. Riwayat perangkat menunjukkan perubahan dari iPhone 14 Pro Max ke Samsung Galaxy Z Fold 7. Data Usage Activities menampilkan Facebook 2.9 MB dan LinkedIn 711.6 KB sebagai penggunaan data aplikasi tertinggi yang tersedia.
+          </div>
+
+          <!-- 4 Key Cards Grid -->
+          <div class="ai-cards-grid">
+            <div class="ai-key-card">
+              <div class="ai-key-icon">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 2h3l1.5 3.5-2 1.5c1 2 2.5 3.5 4.5 4.5l1.5-2 3.5 1.5v3c0 .8-.7 1.5-1.5 1.5C6 15 1 10 1 3c0-.8.7-1.5 1.5-1.5z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+              </div>
+              <div class="ai-key-info">
+                <span class="ai-key-label">KONTAK UTAMA</span>
+                <span class="ai-key-val" id="key-kontak">6281316418057</span>
+                <span class="ai-key-sub">3 komunikasi keluar</span>
+              </div>
+            </div>
+
+            <div class="ai-key-card">
+              <div class="ai-key-icon">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5c-2.5 0-4.5 2-4.5 4.5 0 3.5 4.5 7 4.5 7s4.5-3.5 4.5-7c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.3"/></svg>
+              </div>
+              <div class="ai-key-info">
+                <span class="ai-key-label">LOKASI TERCATAT</span>
+                <span class="ai-key-val" id="key-lokasi">Cakung, Jakarta Timur</span>
+                <span class="ai-key-sub">2 aktivitas</span>
+              </div>
+            </div>
+
+            <div class="ai-key-card">
+              <div class="ai-key-icon">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+              </div>
+              <div class="ai-key-info">
+                <span class="ai-key-label">AKTIVITAS TERAKHIR</span>
+                <span class="ai-key-val">11 Agustus 2026</span>
+                <span class="ai-key-sub">14:26:49</span>
+              </div>
+            </div>
+
+            <div class="ai-key-card">
+              <div class="ai-key-icon">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/></svg>
+              </div>
+              <div class="ai-key-info">
+                <span class="ai-key-label">CAKUPAN ANALISIS</span>
+                <span class="ai-key-val">4 kategori data</span>
+                <span class="ai-key-sub">Komunikasi • Lokasi • Perangkat • Aplikasi</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: ANALISA -->
+        <div>
+          <div class="ai-sec-title">2. ANALISA</div>
+
+          <!-- 2.1 Komunikasi -->
+          <div class="analysis-block">
+            <div class="analysis-text-col">
+              <span class="analysis-sub-heading">2.1 Komunikasi</span>
+              <p class="analysis-para">
+                Selama periode 25 Juli – 11 Agustus 2026, terdapat 5 interaksi komunikasi yang tercatat, seluruhnya merupakan komunikasi keluar (outgoing) dengan 3 nomor berbeda. Nomor 6281316418057 paling banyak muncul dengan 3 komunikasi keluar. Total durasi komunikasi adalah 3 menit 38 detik.
+              </p>
+            </div>
+            <div class="analysis-visual-card">
+              <div class="comm-stats-wrap">
+                <div class="comm-stat-box">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="color:var(--accent);"><path d="M3.5 2.5h3l1.5 3.5-2 1.5c1 2 2.5 3.5 4.5 4.5l1.5-2 3.5 1.5v3c0 .8-.7 1.5-1.5 1.5C7 16 2 11 2 4c0-.8.7-1.5 1.5-1.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                  <div>
+                    <span class="comm-stat-num">5</span>
+                    <div class="comm-stat-sub">Total Interaksi</div>
+                  </div>
+                </div>
+                <div style="font-size:12px; color:var(--text-muted);">&rarr; <b style="color:var(--text-primary); font-family:var(--mono);">5</b> Outgoing &nbsp;<b style="color:var(--text-muted); font-family:var(--mono);">0</b> Incoming</div>
+                <div class="comm-stat-box">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="color:var(--accent);"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                  <div>
+                    <span class="comm-stat-num" style="font-size:16px;">3m 38s</span>
+                    <div class="comm-stat-sub">Total durasi</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2.2 Lokasi -->
+          <div class="analysis-block">
+            <div class="analysis-text-col">
+              <span class="analysis-sub-heading">2.2 Lokasi</span>
+              <p class="analysis-para">
+                Terdapat tiga catatan lokasi pada periode yang tersedia. Dua aktivitas tercatat di wilayah Cakung, Jakarta Timur, dan satu aktivitas di Kelapa Gading, Jakarta Utara. Laporan ini hanya menampilkan lokasi yang terdapat pada data yang tersedia.
+              </p>
+            </div>
+            <div class="analysis-visual-card">
+              <div class="satellite-map-wrap">
+                <div id="satMap"></div>
+                <div class="map-legend-overlay">
+                  <div style="font-size:9.5px; font-weight:700; color:var(--text-muted); margin-bottom:4px;">LOKASI TERCATAT</div>
+                  <div style="display:flex; align-items:center; gap:5px; color:#4ade80;"><span style="width:6px;height:6px;border-radius:50%;background:#4ade80;"></span> Kelapa Gading (1)</div>
+                  <div style="display:flex; align-items:center; gap:5px; color:#f87171; margin-top:2px;"><span style="width:6px;height:6px;border-radius:50%;background:#f87171;"></span> Cakung (2)</div>
+                  <div style="display:flex; align-items:center; gap:5px; color:#94a3b8; margin-top:2px;"><span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;"></span> Lokasi Lain (0)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2.3 Perangkat -->
+          <div class="analysis-block">
+            <div class="analysis-text-col">
+              <span class="analysis-sub-heading">2.3 Perangkat</span>
+              <p class="analysis-para">
+                Terdapat perubahan perangkat dari iPhone 14 Pro Max (tercatat hingga 31 Mei 2026) ke Samsung Galaxy Z Fold 7 (tercatat sejak 16 Agustus 2026) pada data yang tersedia. Informasi ini berdasarkan riwayat perangkat dalam dataset yang tersedia.
+              </p>
+            </div>
+            <div class="analysis-visual-card">
+              <div class="device-transition-box">
+                <div class="dev-item">
+                  <span class="dev-name">iPhone 14 Pro Max</span>
+                  <span class="dev-dates">s.d. 31 Mei 2026</span>
+                </div>
+                <div style="color:var(--accent); font-size:16px;">&rarr;</div>
+                <div class="dev-item" style="text-align:right;">
+                  <span class="dev-name">Samsung Galaxy Z Fold 7</span>
+                  <span class="dev-dates">sejak 16 Agustus 2026</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2.4 Penggunaan Aplikasi -->
+          <div class="analysis-block">
+            <div class="analysis-text-col">
+              <span class="analysis-sub-heading">2.4 Penggunaan Aplikasi</span>
+              <p class="analysis-para">
+                Berdasarkan dataset Data Usage Activities, aplikasi dengan penggunaan data tertinggi yang tersedia adalah Facebook sebesar 2.9 MB dan LinkedIn sebesar 711.6 KB. Nilai menunjukkan penggunaan data pada dataset, bukan isi aktivitas aplikasi.
+              </p>
+            </div>
+            <div class="analysis-visual-card">
+              <div style="font-size:10px; font-weight:700; color:var(--text-muted); letter-spacing:0.06em; text-transform:uppercase;">PENGGUNAAN APLIKASI (DATA USAGE ACTIVITIES)</div>
+              <div class="app-progress-item">
+                <div class="app-progress-info">
+                  <span class="app-name">Facebook</span>
+                  <span class="app-size">2.9 MB</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill" style="width: 80%;"></div></div>
+              </div>
+              <div class="app-progress-item">
+                <div class="app-progress-info">
+                  <span class="app-name">LinkedIn</span>
+                  <span class="app-size">711.6 KB</span>
+                </div>
+                <div class="progress-track"><div class="progress-fill" style="width: 35%;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: LAMPIRAN -->
+        <div>
+          <div class="ai-sec-title">3. LAMPIRAN</div>
+
+          <!-- 3.1 Log Komunikasi -->
+          <div class="attachment-table-title">3.1 Log Komunikasi (Bukti Data)</div>
+          <div class="attachment-table-wrap">
+            <table class="attachment-table">
+              <thead>
+                <tr>
+                  <th>Date/Time</th>
+                  <th>Event</th>
+                  <th>Related Number</th>
+                  <th>Duration</th>
+                  <th>Location</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-family:var(--mono);">2026-08-11 14:26:49</td>
+                  <td class="td-event-out">Outgoing Call</td>
+                  <td style="font-family:var(--mono); color:var(--accent);">6281316418057</td>
+                  <td style="font-family:var(--mono);">1m 15s</td>
+                  <td>KEL. CAKUNG TIMUR, JAKARTA TIMUR</td>
+                </tr>
+                <tr>
+                  <td style="font-family:var(--mono);">2026-08-08 10:17:06</td>
+                  <td class="td-event-out">Outgoing Call</td>
+                  <td style="font-family:var(--mono); color:var(--accent);">6281380321579</td>
+                  <td style="font-family:var(--mono);">39s</td>
+                  <td>KEL. PEGANGSAAN DUA, KELAPA GADING</td>
+                </tr>
+                <tr>
+                  <td style="font-family:var(--mono);">2026-08-06 14:25:27</td>
+                  <td class="td-event-out">Outgoing Call</td>
+                  <td style="font-family:var(--mono); color:var(--accent);">6281316418057</td>
+                  <td style="font-family:var(--mono);">47s</td>
+                  <td>KEL. CAKUNG TIMUR, JAKARTA TIMUR</td>
+                </tr>
+                <tr>
+                  <td style="font-family:var(--mono);">2026-07-25 12:15:57</td>
+                  <td class="td-event-out">Outgoing Call</td>
+                  <td style="font-family:var(--mono); color:var(--accent);">628111878269</td>
+                  <td style="font-family:var(--mono);">29s</td>
+                  <td>BATULAWANG, CIPANAS, CIANJUR</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- 3.2 Data Usage -->
+          <div class="attachment-table-title">3.2 Data Usage (Bukti Data)</div>
+          <div class="attachment-table-wrap" style="max-width: 420px;">
+            <table class="attachment-table">
+              <thead>
+                <tr>
+                  <th>Application</th>
+                  <th>Data Usage</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Facebook</td>
+                  <td style="font-family:var(--mono); font-weight:700; color:var(--text-primary);">2.9 MB</td>
+                </tr>
+                <tr>
+                  <td>LinkedIn</td>
+                  <td style="font-family:var(--mono); font-weight:700; color:var(--text-primary);">711.6 KB</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- BOTTOM FOOTER ACTION BAR -->
+        <div style="display:flex; align-items:center; justify-content:space-between; border-top:1px solid rgba(255,255,255,0.06); padding-top:18px;">
+          <a href="#" style="color:var(--accent); font-size:12px; font-weight:600; text-decoration:none; display:flex; align-items:center; gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 1.5h6l3 3v8a1 1 0 01-1 1h-8a1 1 0 01-1-1v-10a1 1 0 011-1z" stroke="currentColor" stroke-width="1.3"/><path d="M8.5 1.5v3h3" stroke="currentColor" stroke-width="1.3"/></svg>
+            VIEW SOURCE EVIDENCE
+          </a>
+
+          <div class="btn-action-group">
+            <button class="btn-copy-report">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="4.5" y="4.5" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M2.5 8.5h-1a1 1 0 01-1-1v-6a1 1 0 011-1h6a1 1 0 011 1v1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+              COPY REPORT
+            </button>
+            <button class="btn-export-pdf">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v7M4 5.5l2.5 2.5 2.5-2.5M1 10.5v.5a1 1 0 001 1h9a1 1 0 001-1v-.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              EXPORT PDF
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Leaflet JS for Satellite Map -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="search_logic.js"></script>
+  <script>
+    // Initialize Satellite Map Thumbnail for 2.2 Lokasi
+    function initSatMap() {
+      const container = document.getElementById('satMap');
+      if (!container) return;
+
+      // Center on Jakarta Timur / Cakung area
+      const map = L.map('satMap', {
+        zoomControl: false,
+        attributionControl: false,
+        dragging: false,
+        scrollWheelZoom: false
+      }).setView([-6.18, 106.94], 12);
+
+      // Esri Satellite Tile Layer
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 18
+      }).addTo(map);
+
+      // Add Pins
+      const redIcon = L.divIcon({
+        className: 'custom-pin-red',
+        html: `<div style="width:10px;height:10px;border-radius:50%;background:#ff4d63;border:2px solid #fff;box-shadow:0 0 8px #ff4d63;"></div>`
+      });
+      const greenIcon = L.divIcon({
+        className: 'custom-pin-green',
+        html: `<div style="width:10px;height:10px;border-radius:50%;background:#00c8a0;border:2px solid #fff;box-shadow:0 0 8px #00c8a0;"></div>`
+      });
+
+      L.marker([-6.185, 106.95], { icon: redIcon }).addTo(map);
+      L.marker([-6.15, 106.90], { icon: greenIcon }).addTo(map);
+    }
+
+    setupDynamicSearch('.search-group', '#search-input', '#search-type-select', '#btn-search');
+    window.addEventListener('load', initSatMap);
+  </script>
+</body>
+</html>

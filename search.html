@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BNPT Intelligence Platform</title>
+  <meta name="description" content="Platform intelijen BNPT – pencarian data kependudukan dan kartu keluarga." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg-base:       #0e1117;
+      --bg-panel:      #161b24;
+      --border:        rgba(255,255,255,0.07);
+      --border-bright: rgba(255,255,255,0.13);
+      --accent:        #00c8a0;
+      --accent-dim:    rgba(0,200,160,0.14);
+      --accent-glow:   rgba(0,200,160,0.30);
+      --gold:          #c9a227;
+      --text-primary:  #e4e8f0;
+      --text-secondary:#8b93a8;
+      --text-muted:    #4e5670;
+      --font:          'Inter', system-ui, sans-serif;
+      --mono:          'JetBrains Mono', monospace;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* BG GRID */
+    .bg-grid {
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,200,160,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,200,160,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none; z-index: 0;
+    }
+    .bg-radial {
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 50% 42%, rgba(0,200,160,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 20% 80%, rgba(201,162,39,0.05) 0%, transparent 60%);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* PARTICLES */
+    .particle {
+      position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+      animation: floatUp linear infinite; opacity: 0;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 0.5; }
+      100% { transform: translateY(-40px) scale(1); opacity: 0; }
+    }
+
+    /* SCAN LINE */
+    .scan-line {
+      position: fixed; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,200,160,0.4), transparent);
+      animation: scanDown 7s linear infinite;
+      pointer-events: none; z-index: 1;
+    }
+    @keyframes scanDown {
+      0%   { top: 0; opacity: 0; }
+      5%   { opacity: 1; }
+      95%  { opacity: 0.5; }
+      100% { top: 100vh; opacity: 0; }
+    }
+
+    /* TOPBAR */
+    .topbar {
+      position: relative; z-index: 10; height: 52px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(22, 27, 36, 0.6);
+      backdrop-filter: blur(12px);
+    }
+    .topbar-brand { display: flex; align-items: center; gap: 12px; }
+    .topbar-brand img {
+      width: 30px; height: 30px; object-fit: contain;
+      filter: drop-shadow(0 0 6px rgba(201,162,39,0.5));
+    }
+    .topbar-brand-name {
+      font-size: 13px; font-weight: 600; letter-spacing: 0.06em;
+      color: var(--text-secondary); text-transform: uppercase;
+    }
+    .topbar-status {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 500; color: var(--accent);
+      letter-spacing: 0.08em;
+      border: 1px solid rgba(0,200,160,0.3); border-radius: 20px;
+      padding: 4px 10px;
+    }
+    .pulse-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); animation: pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--accent-glow); }
+      50%       { opacity: 0.7; box-shadow: 0 0 0 5px transparent; }
+    }
+
+    /* HERO */
+    .hero {
+      position: relative; z-index: 5; flex: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 0 24px;
+    }
+
+    /* LOGO AREA */
+    .hero-logo-wrap {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      margin-bottom: 32px;
+      animation: fadeSlideDown 0.65s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    @keyframes fadeSlideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .hero-logo-ring {
+      position: relative; width: 90px; height: 90px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .hero-logo-ring::before {
+      content: ''; position: absolute; inset: 0; border-radius: 50%;
+      border: 1.5px dashed rgba(201,162,39,0.22);
+      animation: spin 10s linear infinite;
+    }
+    .hero-logo-ring::after {
+      content: ''; position: absolute; inset: 8px; border-radius: 50%;
+      border: 1px solid rgba(0,200,160,0.2);
+      animation: spin 14s linear infinite reverse;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .hero-logo-inner {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, rgba(201,162,39,0.12), rgba(22,27,36,0.95));
+      border: 1px solid rgba(201,162,39,0.28);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 24px rgba(201,162,39,0.15), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    .hero-logo-inner img {
+      width: 42px; height: 42px; object-fit: contain;
+      filter: drop-shadow(0 0 8px rgba(201,162,39,0.55));
+    }
+    .hero-title {
+      font-size: 12px; font-weight: 700; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--text-secondary);
+    }
+    .hero-subtitle {
+      font-size: 10px; letter-spacing: 0.12em;
+      color: var(--text-muted); text-transform: uppercase;
+    }
+
+    /* HEADING */
+    .hero-heading {
+      font-size: 30px; font-weight: 700; letter-spacing: -0.02em;
+      text-align: center; margin-bottom: 8px;
+      animation: fadeSlideDown 0.65s 0.1s cubic-bezier(0.22,1,0.36,1) both;
+      background: linear-gradient(135deg, #e4e8f0 0%, #6e7d8e 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-desc {
+      font-size: 13px; color: var(--text-muted); text-align: center;
+      margin-bottom: 36px;
+      animation: fadeSlideDown 0.65s 0.18s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    /* SEARCH CARD */
+    .search-card {
+      width: 100%; max-width: 640px;
+      animation: fadeSlideUp 0.65s 0.26s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .search-box {
+      display: flex; align-items: center;
+      background: rgba(22,27,36,0.88);
+      border: 1px solid var(--border-bright);
+      border-radius: 12px; overflow: hidden; height: 54px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.45), 0 0 0 1px transparent;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .search-box:focus-within {
+      border-color: rgba(0,200,160,0.45);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.45), 0 0 0 3px rgba(0,200,160,0.13);
+    }
+
+    .search-type {
+      appearance: none; -webkit-appearance: none;
+      background: rgba(0,200,160,0.07);
+      border: none; border-right: 1px solid var(--border-bright);
+      color: var(--accent);
+      font-family: var(--font); font-size: 12px; font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 0 30px 0 16px; height: 100%;
+      cursor: pointer; outline: none; min-width: 138px;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 4l3 3 3-3' stroke='%2300c8a0' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center;
+      transition: background-color 0.2s;
+    }
+    .search-type:hover, .search-type:focus { background-color: rgba(0,200,160,0.12); }
+    .search-type option { background: #161b24; color: #e4e8f0; }
+
+    .search-input-wrap {
+      flex: 1; display: flex; align-items: center;
+      padding: 0 14px; gap: 10px;
+    }
+    .search-icon { color: var(--text-muted); flex-shrink: 0; }
+    .search-input {
+      flex: 1; background: none; border: none; outline: none;
+      color: var(--text-primary); font-family: var(--font);
+      font-size: 14px; font-weight: 400;
+    }
+    .search-input::placeholder { color: var(--text-muted); }
+
+    .btn-search {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--accent); color: #071a13;
+      border: none; border-radius: 0 11px 11px 0;
+      font-family: var(--font); font-size: 12px; font-weight: 700;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      padding: 0 24px; height: 100%; cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.12s;
+    }
+    .btn-search:hover { background: #00e0b5; box-shadow: 0 0 20px rgba(0,200,160,0.35); }
+    .btn-search:active { transform: scale(0.97); }
+
+    /* HINTS */
+    .search-hints {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 12px; flex-wrap: wrap; justify-content: center;
+    }
+    .hint-label { font-size: 11px; color: var(--text-muted); }
+    .hint-chip {
+      font-size: 11px; color: var(--text-secondary);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border); border-radius: 20px;
+      padding: 3px 10px; cursor: pointer; transition: all 0.18s;
+    }
+    .hint-chip:hover {
+      background: var(--accent-dim); border-color: rgba(0,200,160,0.3);
+      color: var(--accent);
+    }
+
+    /* STATS */
+    .stats-strip {
+      display: flex; gap: 40px; margin-top: 52px;
+      animation: fadeSlideUp 0.65s 0.38s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .stat-item { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .stat-value {
+      font-family: var(--mono); font-size: 22px; font-weight: 500;
+      color: var(--accent); line-height: 1;
+    }
+    .stat-label {
+      font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .stat-divider { width: 1px; height: 38px; background: var(--border); align-self: center; }
+
+    /* FOOTER */
+    .footer {
+      position: relative; z-index: 5; padding: 14px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-top: 1px solid var(--border);
+    }
+    .footer-left  { font-size: 11px; color: var(--text-muted); }
+    .footer-right { font-size: 11px; color: var(--text-muted); font-family: var(--mono); }
+  </style>
+</head>
+<body>
+
+  <div class="bg-grid"></div>
+  <div class="bg-radial"></div>
+  <div class="scan-line"></div>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <img src="images/bnpt_logo.png" alt="BNPT Logo" />
+      <span class="topbar-brand-name">BNPT Intelligence</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <button class="btn-fullscreen" id="btn-fullscreen" onclick="toggleFullScreen()" title="Fullscreen Mode (F11)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+        </svg>
+        <span class="fs-text">Fullscreen</span>
+      </button>
+      <div class="topbar-status">
+        <span class="pulse-dot"></span>
+        SECURE TELEMETRY LINKED
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO CENTER -->
+  <section class="hero">
+
+    <!-- Logo -->
+    <div class="hero-logo-wrap">
+      <div class="hero-logo-ring">
+        <div class="hero-logo-inner">
+          <img src="images/bnpt_logo.png" alt="BNPT" />
+        </div>
+      </div>
+      <div class="hero-title">Intelligence Platform</div>
+      <div class="hero-subtitle">Badan Nasional Penanggulangan Terorisme</div>
+    </div>
+
+    <p class="hero-heading">Cari Data Intelijen</p>
+    <p class="hero-desc">Masukkan nama, nomor telepon, atau nomor KK untuk memulai pencarian</p>
+
+    <!-- Search card -->
+    <div class="search-card">
+      <div class="search-box">
+        <select class="search-type" id="search-type" aria-label="Tipe Pencarian">
+          <option value="name" selected>Name</option>
+          <option value="phone">Phone Number</option>
+          <option value="kk">KK Number</option>
+        </select>
+        <div class="search-input-wrap">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M10.5 10.5l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <input type="text" id="search-input" class="search-input"
+            placeholder="Cari nama..." autocomplete="off" spellcheck="false" />
+        </div>
+        <button class="btn-search" id="btn-search">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M9 9l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          SEARCH
+        </button>
+      </div>
+
+      <!-- Quick hint chips -->
+      <div class="search-hints">
+        <span class="hint-label">Quick:</span>
+        <button class="hint-chip" data-value="Aimana Ilman Aulia" data-type="name">Aimana Ilman Aulia</button>
+        <button class="hint-chip" data-value="3273092008106277" data-type="kk">KK 3273092008106277</button>
+        <button class="hint-chip" data-value="6287781085549" data-type="phone">+62 8778-1085-549</button>
+      </div>
+    </div>
+
+    <!-- Stats strip -->
+    <div class="stats-strip">
+      <div class="stat-item">
+        <span class="stat-value">2.4M+</span>
+        <span class="stat-label">Data Records</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value">340+</span>
+        <span class="stat-label">Datasets</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value">99.9%</span>
+        <span class="stat-label">Uptime</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value">&lt;1s</span>
+        <span class="stat-label">Query Time</span>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <span class="footer-left">BNPT Intelligence Platform &copy; 2026 &mdash; Classified</span>
+    <span class="footer-right">v4.2.1 &middot; Build 20260917</span>
+  </footer>
+
+  <script src="search_logic.js"></script>
+  <script>
+    (function() {
+      // Floating particles
+      const colors = ['rgba(0,200,160,', 'rgba(201,162,39,', 'rgba(77,166,255,'];
+      for (let i = 0; i < 16; i++) {
+        const el = document.createElement('div');
+        el.className = 'particle';
+        const size = Math.random() * 2.5 + 1;
+        const c = colors[Math.floor(Math.random() * colors.length)];
+        el.style.cssText = [
+          'width:' + size + 'px',
+          'height:' + size + 'px',
+          'background:' + c + (Math.random() * 0.35 + 0.1).toFixed(2) + ')',
+          'left:' + (Math.random() * 100) + '%',
+          'animation-duration:' + (Math.random() * 10 + 9) + 's',
+          'animation-delay:' + (Math.random() * 8) + 's'
+        ].join(';');
+        document.body.appendChild(el);
+      }
+
+      const typeSelect   = document.getElementById('search-type');
+      const searchInput  = document.getElementById('search-input');
+      const placeholders = { name: 'Cari nama…', phone: 'Cari nomor telepon…', kk: 'Cari nomor KK…' };
+
+      if (typeSelect && searchInput) {
+        typeSelect.addEventListener('change', () => {
+          searchInput.placeholder = placeholders[typeSelect.value] || 'Cari…';
+          searchInput.value = '';
+          searchInput.focus();
+        });
+      }
+
+      document.querySelectorAll('.hint-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          if (typeSelect) typeSelect.value = chip.dataset.type;
+          if (searchInput) {
+            searchInput.placeholder = placeholders[chip.dataset.type] || 'Cari…';
+            searchInput.value = chip.dataset.value;
+            searchInput.focus();
+          }
+        });
+      });
+
+      setupDynamicSearch('.search-box', '#search-input', '#search-type', '#btn-search');
+    })();
+  </script>
+</body>
+</html>

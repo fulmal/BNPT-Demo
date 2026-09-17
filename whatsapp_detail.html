@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WhatsApp Detail – +6281297228579 | BNPT Intelligence Platform</title>
+  <meta name="description" content="WhatsApp Call Detail Records untuk nomor +6281297228579 – BNPT Intelligence Platform." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="profile.css" />
+  <style>
+    /* ── WHATSAPP DETAIL SPECIFIC ───────────────── */
+    .cdr-page {
+      margin-left: var(--sidebar-w);
+      padding: 0;
+      min-height: calc(100vh - var(--topbar-h) - var(--tabs-h));
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Filter bar */
+    .filter-bar {
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: rgba(16,19,28,0.6);
+    }
+
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .filter-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      min-width: 120px;
+      flex-shrink: 0;
+    }
+
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .filter-chip.active {
+      background: rgba(0,200,160,0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .filter-chip.inactive {
+      background: rgba(255,255,255,0.04);
+      border-color: var(--border-bright);
+      color: var(--text-secondary);
+    }
+    .filter-chip.inactive:hover {
+      background: rgba(255,255,255,0.07);
+      color: var(--text-primary);
+    }
+    .filter-chip .chip-close {
+      display: inline-flex;
+      align-items: center;
+      color: inherit;
+      opacity: 0.7;
+    }
+    .filter-chip .chip-close:hover { opacity: 1; }
+
+    /* Date pickers */
+    .date-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .date-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius);
+      padding: 5px 10px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .date-input-wrap:hover {
+      border-color: rgba(0,200,160,0.35);
+      color: var(--text-secondary);
+    }
+    .date-sep {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+    .btn-refresh-date {
+      background: var(--bg-card);
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      padding: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-refresh-date:hover {
+      border-color: rgba(0,200,160,0.35);
+      color: var(--accent);
+    }
+
+    /* Number Log badge */
+    .number-log-group {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-left: 12px;
+    }
+    .number-log-label {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      padding: 5px 12px;
+      border: 1px solid rgba(0,200,160,0.3);
+      border-radius: var(--radius) 0 0 var(--radius);
+      background: rgba(0,200,160,0.07);
+      white-space: nowrap;
+    }
+    .number-log-select {
+      appearance: none; -webkit-appearance: none;
+      background: var(--bg-card);
+      border: 1px solid var(--border-bright);
+      border-left: none;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      color: var(--text-secondary);
+      font-family: var(--font);
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 5px 24px 5px 10px;
+      cursor: pointer;
+      outline: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 4l3 3 3-3' stroke='%238c9ba5' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 6px center;
+    }
+    .number-log-select option { background: #161b24; }
+
+    /* Content area */
+    .cdr-content {
+      flex: 1;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Sub filter row */
+    .sub-filter-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .sub-search-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius);
+      padding: 7px 12px;
+      flex: 1;
+      max-width: 340px;
+      transition: border-color 0.15s ease;
+    }
+    .sub-search-wrap:focus-within {
+      border-color: rgba(0,200,160,0.4);
+    }
+    .sub-search-input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-family: var(--font);
+      font-size: 12px;
+    }
+    .sub-search-input::placeholder { color: var(--text-muted); font-style: italic; }
+    .sub-search-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      min-width: 56px;
+      flex-shrink: 0;
+    }
+
+    /* Stats row */
+    .stats-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+    .stat-item strong {
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 12.5px;
+    }
+    .stat-sep {
+      color: var(--border-bright);
+      font-size: 14px;
+    }
+    .stat-duration strong {
+      color: #4da6ff;
+    }
+
+    /* CDR Table */
+    .cdr-table-wrap {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      flex: 1;
+    }
+    .cdr-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+    }
+    .cdr-table thead tr {
+      background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid var(--border);
+    }
+    .cdr-table th {
+      text-align: left;
+      padding: 9px 10px;
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .cdr-table tbody tr {
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.15s ease;
+    }
+    .cdr-table tbody tr:last-child { border-bottom: none; }
+    .cdr-table tbody tr:hover { background: rgba(255,255,255,0.025); }
+    .cdr-table td {
+      padding: 10px 10px;
+      color: var(--text-secondary);
+      vertical-align: top;
+    }
+
+    /* Direction badges */
+    .dir-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+    .dir-outgoing {
+      color: #ff7043;
+      background: rgba(255,112,67,0.12);
+    }
+    .dir-incoming {
+      color: #26c6da;
+      background: rgba(38,198,218,0.12);
+    }
+
+    /* Number cells */
+    .num-cell {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-primary);
+    }
+    .num-peer {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      cursor: pointer;
+      transition: color 0.15s ease;
+    }
+    .num-peer:hover { color: #00e0b5; text-decoration: underline; }
+
+    /* Identity hints */
+    .hints-cell {
+      max-width: 220px;
+    }
+    .hints-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .hint-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+    }
+    .hint-tag {
+      font-size: 9.5px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+    .hint-tag.red {
+      background: rgba(255,77,99,0.15);
+      border: 1px solid rgba(255,77,99,0.3);
+      color: #ff7088;
+    }
+    .hint-tag.orange {
+      background: rgba(255,167,38,0.12);
+      border: 1px solid rgba(255,167,38,0.3);
+      color: #ffb830;
+    }
+    .hint-tag.green {
+      background: rgba(0,200,160,0.12);
+      border: 1px solid rgba(0,200,160,0.3);
+      color: var(--accent);
+    }
+    .hint-tag.grey {
+      background: rgba(140,155,175,0.1);
+      border: 1px solid rgba(140,155,175,0.25);
+      color: #9ab0c2;
+    }
+    .hint-see-more {
+      font-size: 9.5px;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      opacity: 0.8;
+    }
+    .hint-see-more:hover { opacity: 1; text-decoration: underline; }
+    .hint-meta {
+      font-size: 9px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* Duration */
+    .dur-cell {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+
+    /* Location */
+    .loc-cell {
+      font-size: 10.5px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+      max-width: 140px;
+    }
+    .loc-cell .loc-area {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 11px;
+    }
+    .loc-cell .loc-sub {
+      color: var(--text-muted);
+      font-size: 10px;
+    }
+    .loc-subject {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ───────────────── TOPBAR ───────────────── -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="logo-wrap" style="cursor: pointer;" onclick="window.location.href='search.html'">
+        <div class="logo-emblem">
+          <img src="images/bnpt_logo.png" alt="BNPT Logo" style="width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 0 4px rgba(226,0,26,0.3));" />
+        </div>
+      </div>
+    </div>
+
+    <div class="topbar-search">
+      <button class="btn-back" onclick="window.location.href='search.html'">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M8.5 1L3 6.5l5.5 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back to results
+      </button>
+      <div class="search-group active">
+        <select class="search-type-select" id="search-type-select" aria-label="Search Type">
+          <option value="name">Name</option>
+          <option value="phone" selected>Phone Number</option>
+          <option value="kk">KK Number</option>
+        </select>
+        <div class="search-input-wrap">
+          <svg class="search-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M9.5 9.5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input type="text" id="search-input" class="search-input" value="+6281293949502" placeholder="Search phone number..." />
+        </div>
+        <button class="btn-search" id="btn-search">SEARCH</button>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <div class="retrieval-info">
+        <span class="retrieval-label">Retrieved on</span>
+        <span class="retrieval-date">Aug 15, 2026, 05:30 PM</span>
+      </div>
+      <button class="btn-fullscreen" id="btn-fullscreen" onclick="toggleFullScreen()" title="Fullscreen Mode (F11)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+        </svg>
+        <span class="fs-text">Fullscreen</span>
+      </button>
+      <button class="btn-export">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v7M4 5.5l2.5 2.5 2.5-2.5M1 10.5v.5a1 1 0 001 1h9a1 1 0 001-1v-.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Export Data
+      </button>
+    </div>
+  </header>
+
+  <!-- ───────────────── MAIN TABS ───────────────── -->
+  <nav class="tab-nav" role="navigation">
+    <div class="tab-nav-inner">
+      <button class="tab-btn" onclick="window.location.href='profile_phone.html'">Profile Overview</button>
+      <button class="tab-btn" onclick="window.location.href='index.html'">Family Card</button>
+      <button class="tab-btn" onclick="window.location.href='phone_detail.html'">Phone Detail</button>
+      <button class="tab-btn" onclick="window.location.href='map_review.html'">Map Review</button>
+      <button class="tab-btn" onclick="window.location.href='cellular_history.html'">Cellular History</button>
+      <button class="tab-btn active" id="tab-whatsapp">WhatsApp Detail</button>
+      <button class="tab-btn" onclick="window.location.href='data_usage.html'">Data Usage Activities</button>
+      <button class="tab-btn" onclick="window.location.href='link_analysis.html'">Link Analysis</button>
+      <button class="tab-btn" onclick="window.location.href='ai_analysis.html'">AI Analysis</button>
+    </div>
+    <div class="secure-badge">
+      <span class="pulse-dot"></span>
+      SECURE TELEMETRY LINKED
+    </div>
+  </nav>
+
+  <!-- ───────────────── LAYOUT ───────────────── -->
+  <div style="padding-top: calc(var(--topbar-h) + var(--tabs-h)); display:flex; min-height:100vh;">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <button class="sidebar-icon active" title="Search">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="7.5" cy="7.5" r="5" stroke="currentColor" stroke-width="1.6"/><path d="M12 12l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <button class="sidebar-icon" title="Folders">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 5a1 1 0 011-1h5l1.5 2H15a1 1 0 011 1v7a1 1 0 01-1 1H3a1 1 0 01-1-1V5z" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+      <button class="sidebar-icon" title="Analytics">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="9" width="4" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="7" y="5" width="4" height="11" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="12" y="2" width="4" height="14" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+      <button class="sidebar-icon" title="Reports">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 2h7l4 4v10a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5"/><path d="M11 2v4h4M6 9h6M6 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="sidebar-spacer"></div>
+      <button class="sidebar-icon" title="Help">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M9 10v1M9 7a2 2 0 110 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <button class="sidebar-icon" title="Settings">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M9 1v2M9 15v2M1 9h2M15 9h2M3.22 3.22l1.42 1.42M13.36 13.36l1.42 1.42M3.22 14.78l1.42-1.42M13.36 4.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </aside>
+
+    <!-- MAIN CDR CONTENT -->
+    <div class="cdr-page">
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <!-- Dataset Source -->
+        <div class="filter-row">
+          <span class="filter-label">DATASET SOURCE</span>
+          <div class="filter-chip active">Provider Dataset</div>
+          <div class="filter-chip inactive">
+            Telco Dataset v2
+            <span class="chip-close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+          </div>
+          <div class="filter-chip inactive">
+            Telco Dataset v1
+            <span class="chip-close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+          </div>
+        </div>
+
+        <!-- Temporal Scope + Unique Number Log -->
+        <div class="filter-row">
+          <span class="filter-label">TEMPORAL SCOPE</span>
+          <div class="date-group">
+            <div class="date-input-wrap">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="2" width="10" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 1v2M8 1v2M1 5h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              DD/MM/YYYY
+            </div>
+            <span class="date-sep">to</span>
+            <div class="date-input-wrap">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="2" width="10" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 1v2M8 1v2M1 5h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              DD/MM/YYYY
+            </div>
+            <button class="btn-refresh-date">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1.5 6.5A5 5 0 1011 6.5M1.5 4v2.5h2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+          <div class="number-log-group">
+            <span class="number-log-label">UNIQUE NUMBER LOG</span>
+            <select class="number-log-select">
+              <option>All numbers</option>
+              <option>+6281297228579</option>
+              <option>6281316438857</option>
+              <option>6281388321579</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- CDR CONTENT -->
+      <div class="cdr-content">
+
+        <!-- Sub-filter row -->
+        <div class="sub-filter-row">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span class="sub-search-label">SEARCH</span>
+          </div>
+          <div style="flex:1; max-width:340px;">
+            <div class="sub-search-wrap">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style="color:var(--text-muted); flex-shrink:0;"><circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M9 9l2.5 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+              <input class="sub-search-input" type="text" placeholder="MISSION / location / possible name" id="cdr-search" />
+            </div>
+          </div>
+          <!-- Unique Number Log (inline) -->
+          <div class="number-log-group" style="margin-left:auto;">
+            <span class="number-log-label" style="border-radius: var(--radius); border-right:1px solid rgba(0,200,160,0.3);">UNIQUE NUMBER LOG</span>
+            <select class="number-log-select">
+              <option>All numbers</option>
+              <option>+6281297228579</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Stats row -->
+        <div class="stats-row">
+          <div class="stat-item">TOTAL CALLS: <strong>5</strong></div>
+          <span class="stat-sep">|</span>
+          <div class="stat-item">UNIQUE NUMBERS: <strong>3</strong></div>
+          <span class="stat-sep">|</span>
+          <div class="stat-item stat-duration">TOTAL DURATION: <strong>3m 38s</strong></div>
+          <div style="margin-left: auto;">
+            <div class="secure-badge" style="position:static; border-radius: 20px; padding: 4px 12px;">
+              <span class="pulse-dot"></span>
+              SECURE TELEMETRY LINKED
+            </div>
+          </div>
+        </div>
+
+        <!-- CDR Table -->
+        <div class="cdr-table-wrap">
+          <table class="cdr-table" id="cdr-table">
+            <thead>
+              <tr>
+                <th>BEGIN TIME</th>
+                <th>END TIME</th>
+                <th>DIRECTION</th>
+                <th>CALLER</th>
+                <th>RECEIVER</th>
+                <th>PEER MSISDN</th>
+                <th>IDENTITY HINTS</th>
+                <th>DURATION</th>
+                <th>CALLER LOCATION</th>
+                <th>RECEIVER LOCATION</th>
+                <th>SUBJECT LOCATION</th>
+              </tr>
+            </thead>
+            <tbody id="cdr-tbody">
+              <!-- Row 1 -->
+              <tr>
+                <td class="num-cell">2026-08-15 10:14:02</td>
+                <td class="num-cell">2026-08-15 10:15:03</td>
+                <td>
+                  <div class="dir-badge dir-outgoing">
+                    <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1 8L8 1M8 1H4M8 1v4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                    outgoing
+                  </div>
+                </td>
+                <td class="num-cell">6281297229579</td>
+                <td class="num-cell">6281316438857</td>
+                <td class="num-peer" onclick="alert('Navigating to: 6281316438857')">6281316438857</td>
+                <td class="hints-cell">
+                  <div class="hints-wrap">
+                    <div class="hint-tags">
+                      <span class="hint-tag red">If Not Found</span>
+                      <span class="hint-tag orange">You have exceeded you...</span>
+                    </div>
+                    <a class="hint-see-more">SEE MORE</a>
+                    <span class="hint-meta">metadata: getcontact, truecaller</span>
+                  </div>
+                </td>
+                <td class="dur-cell">1m 1s</td>
+                <td class="loc-cell">
+                  <div class="loc-area">KEL. CAKUNG TIMUR-CAKUNG,</div>
+                  <div class="loc-sub">JAKARTA TIMUR, DKI JAKARTA</div>
+                </td>
+                <td class="loc-cell">
+                  <div class="loc-area">KEL. CAKUNG TIMUR-CAKUNG,</div>
+                  <div class="loc-sub">JAKARTA TIMUR, DKI JAKARTA</div>
+                </td>
+                <td class="loc-subject">JAKARTA TIMUR</td>
+              </tr>
+
+              <!-- Row 2 -->
+              <tr>
+                <td class="num-cell">2026-08-15 11:20:10</td>
+                <td class="num-cell">2026-08-15 11:20:40</td>
+                <td>
+                  <div class="dir-badge dir-outgoing">
+                    <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1 8L8 1M8 1H4M8 1v4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                    outgoing
+                  </div>
+                </td>
+                <td class="num-cell">6281297229579</td>
+                <td class="num-cell">6281388321579</td>
+                <td class="num-peer" onclick="alert('Navigating to: 6281388321579')">6281388321579</td>
+                <td class="hints-cell">
+                  <div class="hints-wrap">
+                    <div class="hint-tags">
+                      <span class="hint-tag red">If Not Found</span>
+                      <span class="hint-tag grey">Kreditplus Default Block</span>
+                    </div>
+                    <a class="hint-see-more">SEE MORE</a>
+                    <span class="hint-meta">metadata: getcontact</span>
+                  </div>
+                </td>
+                <td class="dur-cell">30s</td>
+                <td class="loc-cell">
+                  <div class="loc-area">KEL. PESANGGRAHAN DUA-KELAPA</div>
+                  <div class="loc-sub">GADING, JAKARTA UTARA</div>
+                </td>
+                <td class="loc-cell">
+                  <div class="loc-area">KEL. PESANGGRAHAN DUA-KELAPA</div>
+                  <div class="loc-sub">GADING, JAKARTA UTARA</div>
+                </td>
+                <td class="loc-subject">JAKARTA UTARA</td>
+              </tr>
+
+              <!-- Row 3 -->
+              <tr>
+                <td class="num-cell">2026-08-15 13:45:12</td>
+                <td class="num-cell">2026-08-15 13:45:54</td>
+                <td>
+                  <div class="dir-badge dir-outgoing">
+                    <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1 8L8 1M8 1H4M8 1v4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                    outgoing
+                  </div>
+                </td>
+                <td class="num-cell">6281297229579</td>
+                <td class="num-cell">6281316438857</td>
+                <td class="num-peer" onclick="alert('Navigating to: 6281316438857')">6281316438857</td>
+                <td class="hints-cell">
+                  <div class="hints-wrap">
+                    <div class="hint-tags">
+                      <span class="hint-tag red">If Not Found</span>
+                      <span class="hint-tag orange">You have exceeded you...</span>
+                    </div>
+                    <a class="hint-see-more">SEE MORE</a>
+                    <span class="hint-meta">metadata: getcontact, truecaller</span>
+                  </div>
+                </td>
+                <td class="dur-cell">42s</td>
+                <td class="loc-cell">
+                  <div class="loc-area">KEL. CAKUNG TIMUR-CAKUNG,</div>
+                  <div class="loc-sub">JAKARTA TIMUR, DKI JAKARTA</div>
+                </td>
+                <td class="loc-cell">
+                  <div class="loc-area">KEL. CAKUNG TIMUR-CAKUNG,</div>
+                  <div class="loc-sub">JAKARTA TIMUR, DKI JAKARTA</div>
+                </td>
+                <td class="loc-subject">JAKARTA TIMUR</td>
+              </tr>
+
+              <!-- Row 4 -->
+              <tr>
+                <td class="num-cell">2026-08-15 14:02:30</td>
+                <td class="num-cell">2026-08-15 14:03:17</td>
+                <td>
+                  <div class="dir-badge dir-outgoing">
+                    <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1 8L8 1M8 1H4M8 1v4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                    outgoing
+                  </div>
+                </td>
+                <td class="num-cell">6281297229579</td>
+                <td class="num-cell">6281316438857</td>
+                <td class="num-peer" onclick="alert('Navigating to: 6281316438857')">6281316438857</td>
+                <td class="hints-cell">
+                  <div class="hints-wrap">
+                    <div class="hint-tags">
+                      <span class="hint-tag red">If Not Found</span>
+                      <span class="hint-tag orange">You have exceeded you...</span>
+                    </div>
+                    <a class="hint-see-more">SEE MORE</a>
+                    <span class="hint-meta">metadata: getcontact, truecaller</span>
+                  </div>
+                </td>
+                <td class="dur-cell">47s</td>
+                <td class="loc-cell">
+                  <div class="loc-area">KEL. CAKUNG TIMUR-CAKUNG,</div>
+                  <div class="loc-sub">JAKARTA TIMUR, DKI JAKARTA</div>
+                </td>
+                <td class="loc-cell">
+                  <div class="loc-area">KEL. CAKUNG TIMUR-CAKUNG,</div>
+                  <div class="loc-sub">JAKARTA TIMUR, DKI JAKARTA</div>
+                </td>
+                <td class="loc-subject">JAKARTA TIMUR</td>
+              </tr>
+
+              <!-- Row 5 – incoming -->
+              <tr>
+                <td class="num-cell">2026-08-15 15:58:12</td>
+                <td class="num-cell">2026-08-15 15:58:41</td>
+                <td>
+                  <div class="dir-badge dir-incoming">
+                    <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M8 1L1 8M1 8h4M1 8V4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                    incoming
+                  </div>
+                </td>
+                <td class="num-cell">6281113878269</td>
+                <td class="num-cell">6281297229579</td>
+                <td class="num-peer" onclick="alert('Navigating to: 6281113878269')">6281113878269</td>
+                <td class="hints-cell">
+                  <div class="hints-wrap">
+                    <div class="hint-tags">
+                      <span class="hint-tag green">Personal Contact</span>
+                      <span class="hint-tag green">Spam Threat Cleaned</span>
+                    </div>
+                    <a class="hint-see-more">SEE MORE</a>
+                    <span class="hint-meta">metadata: truecaller</span>
+                  </div>
+                </td>
+                <td class="dur-cell">29s</td>
+                <td class="loc-cell">
+                  <div class="loc-area">BATULAWANG-CIPANAS,</div>
+                  <div class="loc-sub">CIANJUR-CIPANAS, CIPANAS, CIANJUR</div>
+                </td>
+                <td class="loc-cell">
+                  <div class="loc-area">BATULAWANG-CIPANAS,</div>
+                  <div class="loc-sub">CIANJUR-CIPANAS, CIPANAS, CIANJUR</div>
+                </td>
+                <td class="loc-subject">CIANJUR</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div><!-- /cdr-content -->
+    </div><!-- /cdr-page -->
+  </div>
+
+  <script src="search_logic.js"></script>
+  <script>
+    // Setup dynamic search in topbar
+    setupDynamicSearch('.search-group', '#search-input', '#search-type-select', '#btn-search');
+
+    // Live filter on CDR table
+    document.getElementById('cdr-search').addEventListener('input', function() {
+      const q = this.value.trim().toLowerCase();
+      const rows = document.querySelectorAll('#cdr-tbody tr');
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = !q || text.includes(q) ? '' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>

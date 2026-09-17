@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cellular History | BNPT Intelligence Platform</title>
+  <meta name="description" content="Cellular History CDR Intelijen Telemetri - BNPT Intelligence Platform." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="profile.css" />
+  <style>
+    /* ── CELLULAR HISTORY PAGE STYLES ───── */
+    .cellular-page {
+      margin-left: var(--sidebar-w);
+      padding: 20px 24px 48px;
+      min-height: calc(100vh - var(--topbar-h) - var(--tabs-h));
+      width: calc(100% - var(--sidebar-w));
+    }
+
+    /* Filter Bar */
+    .cell-filter-bar {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 12px 18px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: auto 1fr 1fr 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+    .filter-item {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .filter-item-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .filter-item-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #0d121a;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      color: var(--text-primary);
+    }
+    .filter-item-input input {
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-family: var(--font);
+      font-size: 12px;
+      width: 100%;
+    }
+    .filter-item-input input::placeholder { color: var(--text-muted); }
+    .filter-item-input svg { color: var(--text-muted); flex-shrink: 0; }
+
+    /* Metrics Grid (5 Cards) */
+    .cell-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .cell-metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .cell-metric-card:hover {
+      border-color: rgba(0, 200, 160, 0.4);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+    .cell-metric-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: rgba(0, 200, 160, 0.08);
+      border: 1px solid rgba(0, 200, 160, 0.2);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .cell-metric-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow: hidden;
+    }
+    .cell-metric-title {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .cell-metric-val {
+      font-family: var(--mono);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    /* Middle Layout (Timeline + Top Contacts) */
+    .cell-mid-layout {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    .cell-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+    }
+    .cell-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+    .cell-panel-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* Legend */
+    .timeline-legend {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .legend-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+
+    /* Timeline Bar Chart SVG / CSS Container */
+    .timeline-chart-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+      flex: 1;
+      justify-content: flex-end;
+    }
+    .bars-container {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      height: 140px;
+      padding: 0 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .time-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      height: 100%;
+      justify-content: flex-end;
+    }
+    .bars-pair {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 100%;
+    }
+    .bar {
+      width: 6px;
+      border-radius: 3px 3px 0 0;
+      transition: height 0.3s ease;
+    }
+    .bar.voice { background: var(--accent); }
+    .bar.sms { background: #3b82f6; }
+    .bar.other { background: #6b7a90; }
+    .time-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    /* Top Contacts Table */
+    .top-contacts-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .top-contacts-table th {
+      text-align: left;
+      padding: 6px 10px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .top-contacts-table td {
+      padding: 9px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      vertical-align: middle;
+      color: var(--text-secondary);
+    }
+    .top-contacts-table tbody tr:last-child td { border-bottom: none; }
+    .top-contacts-table tbody tr:hover { background: rgba(255, 255, 255, 0.02); }
+
+    /* Historical CDR Table Section */
+    .cdr-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      overflow: hidden;
+    }
+    .cdr-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .cdr-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .btn-export-link {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+    }
+    .btn-export-link:hover { text-decoration: underline; }
+
+    .cdr-table-wrap {
+      overflow-x: auto;
+    }
+    .cdr-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .cdr-table th {
+      text-align: left;
+      padding: 9px 12px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border);
+    }
+    .cdr-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: middle;
+      color: var(--text-secondary);
+    }
+    .cdr-table tbody tr:last-child td { border-bottom: none; }
+    .cdr-table tbody tr:hover { background: rgba(0, 200, 160, 0.03); }
+    .td-num {
+      font-family: var(--mono);
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .td-mono {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+    .td-datetime {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ───────────────── TOPBAR ───────────────── -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="logo-wrap" style="cursor: pointer;" onclick="window.location.href='search.html'">
+        <div class="logo-emblem">
+          <img src="images/bnpt_logo.png" alt="BNPT Logo" style="width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 0 4px rgba(226,0,26,0.3));" />
+        </div>
+      </div>
+    </div>
+
+    <div class="topbar-search">
+      <button class="btn-back" onclick="window.location.href='search.html'">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M8.5 1L3 6.5l5.5 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back to results
+      </button>
+      <div class="search-group active">
+        <select class="search-type-select" id="search-type-select" aria-label="Search Type">
+          <option value="name">Name</option>
+          <option value="phone" selected>Phone Number</option>
+          <option value="kk">KK Number</option>
+        </select>
+        <div class="search-input-wrap">
+          <svg class="search-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M9.5 9.5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input type="text" id="search-input" class="search-input" value="+6281293949502" placeholder="Search phone number..." />
+        </div>
+        <button class="btn-search" id="btn-search">SEARCH</button>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <div class="retrieval-info">
+        <span class="retrieval-label">Retrieved on</span>
+        <span class="retrieval-date" id="retrieval-date">Aug 15, 2026, 05:30 PM</span>
+      </div>
+      <button class="btn-fullscreen" id="btn-fullscreen" onclick="toggleFullScreen()" title="Fullscreen Mode (F11)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+        </svg>
+        <span class="fs-text">Fullscreen</span>
+      </button>
+      <button class="btn-export">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v7M4 5.5l2.5 2.5 2.5-2.5M1 10.5v.5a1 1 0 001 1h9a1 1 0 001-1v-.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Export Data
+      </button>
+    </div>
+  </header>
+
+  <!-- ───────────────── MAIN TABS ───────────────── -->
+  <nav class="tab-nav" role="navigation">
+    <div class="tab-nav-inner">
+      <button class="tab-btn" onclick="window.location.href='profile_phone.html'">Profile Overview</button>
+      <button class="tab-btn" onclick="window.location.href='index.html'">Family Card</button>
+      <button class="tab-btn" onclick="window.location.href='phone_detail.html'">Phone Detail</button>
+      <button class="tab-btn" onclick="window.location.href='map_review.html'">Map Review</button>
+      <button class="tab-btn active" id="tab-cellular">Cellular History</button>
+      <button class="tab-btn" onclick="window.location.href='whatsapp_detail.html'">WhatsApp Detail</button>
+      <button class="tab-btn" onclick="window.location.href='data_usage.html'">Data Usage Activities</button>
+      <button class="tab-btn" onclick="window.location.href='link_analysis.html'">Link Analysis</button>
+      <button class="tab-btn" onclick="window.location.href='ai_analysis.html'">AI Analysis</button>
+    </div>
+    <div class="secure-badge">
+      <span class="pulse-dot"></span>
+      SECURE TELEMETRY LINKED
+    </div>
+  </nav>
+
+  <!-- ───────────────── LAYOUT ───────────────── -->
+  <div style="padding-top: calc(var(--topbar-h) + var(--tabs-h)); display:flex; min-height:100vh;">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <button class="sidebar-icon active" title="Search">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="7.5" cy="7.5" r="5" stroke="currentColor" stroke-width="1.6"/><path d="M12 12l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <button class="sidebar-icon" title="Folders">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 5a1 1 0 011-1h5l1.5 2H15a1 1 0 011 1v7a1 1 0 01-1 1H3a1 1 0 01-1-1V5z" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+      <button class="sidebar-icon" title="Analytics">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="9" width="4" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="7" y="5" width="4" height="11" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="12" y="2" width="4" height="14" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+      <button class="sidebar-icon" title="Reports">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 2h7l4 4v10a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5"/><path d="M11 2v4h4M6 9h6M6 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="sidebar-spacer"></div>
+      <button class="sidebar-icon" title="Help">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M9 10v1M9 7a2 2 0 110 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <button class="sidebar-icon" title="Settings">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M9 1v2M9 15v2M1 9h2M15 9h2M3.22 3.22l1.42 1.42M13.36 13.36l1.42 1.42M3.22 14.78l1.42-1.42M13.36 4.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </aside>
+
+    <!-- MAIN CELLULAR CONTENT -->
+    <main class="cellular-page">
+
+      <!-- FILTER CONTROLS BAR -->
+      <div class="cell-filter-bar">
+        <div class="filter-item">
+          <span class="filter-item-label">DATE RANGE</span>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <div class="filter-item-input">
+              <input type="text" value="dd/mm/yyyy" placeholder="dd/mm/yyyy" />
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="2.5" width="10" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 5.5h10M4 1v3M9 1v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </div>
+            <span style="color:var(--text-muted); font-size:12px;">-</span>
+            <div class="filter-item-input">
+              <input type="text" value="dd/mm/yyyy" placeholder="dd/mm/yyyy" />
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="2.5" width="10" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 5.5h10M4 1v3M9 1v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-item">
+          <span class="filter-item-label">NUMBER / MSISDN</span>
+          <div class="filter-item-input">
+            <input type="text" placeholder="e.g. 628123456789" />
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M8.5 8.5l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+
+        <div class="filter-item">
+          <span class="filter-item-label">BTS / LOCATION</span>
+          <div class="filter-item-input">
+            <input type="text" placeholder="e.g. Cell ID or Area" />
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1.5c-2.5 0-4.5 2-4.5 4.5 0 3.5 4.5 7 4.5 7s4.5-3.5 4.5-7c0-2.5-2-4.5-4.5-4.5z" stroke="currentColor" stroke-width="1.2"/><circle cx="6.5" cy="6" r="1.5" stroke="currentColor" stroke-width="1.2"/></svg>
+          </div>
+        </div>
+
+        <div class="filter-item">
+          <span class="filter-item-label">SEARCH</span>
+          <div class="filter-item-input">
+            <input type="text" placeholder="Keyword, number, or location" />
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M8.5 8.5l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- METRICS ROW (5 CARDS) -->
+      <div class="cell-metrics-grid">
+        <!-- Metric 1: Total Calls -->
+        <div class="cell-metric-card">
+          <div class="cell-metric-icon">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3.5 2.5h3l1.5 3.5-2 1.5c1 2 2.5 3.5 4.5 4.5l1.5-2 3.5 1.5v3c0 .8-.7 1.5-1.5 1.5C7 16 2 11 2 4c0-.8.7-1.5 1.5-1.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="cell-metric-content">
+            <span class="cell-metric-title">TOTAL CALLS</span>
+            <span class="cell-metric-val" id="val-total-calls">128</span>
+          </div>
+        </div>
+
+        <!-- Metric 2: Total SMS -->
+        <div class="cell-metric-card">
+          <div class="cell-metric-icon">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 4h12a1 1 0 011 1v8a1 1 0 01-1 1H5l-3 3V5a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="cell-metric-content">
+            <span class="cell-metric-title">TOTAL SMS</span>
+            <span class="cell-metric-val" id="val-total-sms">47</span>
+          </div>
+        </div>
+
+        <!-- Metric 3: Total Duration -->
+        <div class="cell-metric-card">
+          <div class="cell-metric-icon">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M9 5v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <div class="cell-metric-content">
+            <span class="cell-metric-title">TOTAL DURATION</span>
+            <span class="cell-metric-val" id="val-total-duration">19h 30m</span>
+          </div>
+        </div>
+
+        <!-- Metric 4: Unique BTS -->
+        <div class="cell-metric-card">
+          <div class="cell-metric-icon">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 15v-6M6 15l3-10 3 10M3 13a8 8 0 0112 0M5 10a5 5 0 018 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </div>
+          <div class="cell-metric-content">
+            <span class="cell-metric-title">UNIQUE BTS</span>
+            <span class="cell-metric-val" id="val-unique-bts">14</span>
+          </div>
+        </div>
+
+        <!-- Metric 5: Last Activity -->
+        <div class="cell-metric-card">
+          <div class="cell-metric-icon">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 9h3l2.5-5 3.5 10 2.5-5h2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="cell-metric-content">
+            <span class="cell-metric-title">LAST ACTIVITY</span>
+            <span class="cell-metric-val" id="val-last-activity" style="font-size:13px;">16 Aug 2026 02:01 PM</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MIDDLE SECTION (Timeline + Top Contacts) -->
+      <div class="cell-mid-layout">
+
+        <!-- Activity Timeline Panel -->
+        <div class="cell-panel">
+          <div class="cell-panel-header">
+            <span class="cell-panel-title">Activity Timeline</span>
+            <div class="timeline-legend">
+              <div class="legend-item"><span class="legend-dot" style="background:var(--accent);"></span> Voice Call</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span> SMS</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#6b7a90;"></span> Other</div>
+            </div>
+          </div>
+
+          <div class="timeline-chart-wrap">
+            <div class="bars-container" id="bars-container">
+              <!-- Bar groups rendered dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Contacts Panel -->
+        <div class="cell-panel">
+          <div class="cell-panel-header">
+            <span class="cell-panel-title">Top Contacts</span>
+            <a href="#" class="btn-export-link">View All &rarr;</a>
+          </div>
+
+          <table class="top-contacts-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Number</th>
+                <th>Interactions</th>
+                <th>Total Duration</th>
+              </tr>
+            </thead>
+            <tbody id="top-contacts-body">
+              <tr>
+                <td>1</td>
+                <td class="td-num">6282183470124</td>
+                <td>28</td>
+                <td style="font-family:var(--mono);">4h 12m 9s</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td class="td-num">62811891358</td>
+                <td>17</td>
+                <td style="font-family:var(--mono);">2h 36m 21s</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td class="td-num">628217701220</td>
+                <td>12</td>
+                <td style="font-family:var(--mono);">1h 48m 6s</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td class="td-num">62811501122</td>
+                <td>9</td>
+                <td style="font-family:var(--mono);">1h 12m 33s</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td class="td-num">6281893367</td>
+                <td>7</td>
+                <td style="font-family:var(--mono);">52m 11s</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <!-- BOTTOM SECTION: HISTORICAL CDR -->
+      <div class="cdr-section">
+        <div class="cdr-header">
+          <span class="cdr-title">Historical CDR</span>
+          <a href="#" class="btn-export-link">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v7M4 5.5l2.5 2.5 2.5-2.5M1 10.5v.5a1 1 0 001 1h9a1 1 0 001-1v-.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Export Data
+          </a>
+        </div>
+
+        <div class="cdr-table-wrap">
+          <table class="cdr-table">
+            <thead>
+              <tr>
+                <th>Begin Time</th>
+                <th>End Time</th>
+                <th>Type</th>
+                <th>Caller</th>
+                <th>Receiver</th>
+                <th>Counterparty</th>
+                <th>Duration</th>
+                <th>IMEI</th>
+                <th>IMSI</th>
+                <th>BTS / Cell ID</th>
+                <th>Subject Location</th>
+              </tr>
+            </thead>
+            <tbody id="cdr-table-body">
+              <tr>
+                <td class="td-datetime">16 Aug 2026 13:47:21</td>
+                <td class="td-datetime">16 Aug 2026 13:49:43</td>
+                <td>Voice Call</td>
+                <td class="td-num">628111501122</td>
+                <td class="td-num">628233367674</td>
+                <td class="td-num">628233367674</td>
+                <td style="font-family:var(--mono);">2m 22s</td>
+                <td class="td-mono">356789103456789</td>
+                <td class="td-mono">510100123456789</td>
+                <td>BTS-2318 (LAC:1043)</td>
+                <td>Jakarta Selatan</td>
+              </tr>
+              <tr>
+                <td class="td-datetime">16 Aug 2026 12:18:03</td>
+                <td class="td-datetime">16 Aug 2026 12:21:11</td>
+                <td>Voice Call</td>
+                <td class="td-num">6282536517674</td>
+                <td class="td-num">628111501122</td>
+                <td class="td-num">6282536517674</td>
+                <style>font-family:var(--mono);</style><td style="font-family:var(--mono);">3m 8s</td>
+                <td class="td-mono">356789103456789</td>
+                <td class="td-mono">510100123456789</td>
+                <td>BTS-2211 (LAC:2310)</td>
+                <td>Jakarta Selatan</td>
+              </tr>
+              <tr>
+                <td class="td-datetime">16 Aug 2026 10:03:55</td>
+                <td class="td-datetime">16 Aug 2026 10:04:12</td>
+                <td>SMS</td>
+                <td class="td-num">628111501122</td>
+                <td class="td-num">62818991358</td>
+                <td class="td-num">62818991358</td>
+                <td style="color:var(--text-muted);">-</td>
+                <td class="td-mono">356789103456789</td>
+                <td class="td-mono">510100123456789</td>
+                <td>BTS-1987 (LAC:2310)</td>
+                <td>Jakarta Pusat</td>
+              </tr>
+              <tr>
+                <td class="td-datetime">16 Aug 2026 08:43:21</td>
+                <td class="td-datetime">16 Aug 2026 08:45:02</td>
+                <td>Voice Call</td>
+                <td class="td-num">628189911220</td>
+                <td class="td-num">628217701220</td>
+                <td class="td-num">628217701220</td>
+                <td style="font-family:var(--mono);">1m 41s</td>
+                <td class="td-mono">356789103456789</td>
+                <td class="td-mono">510100123456789</td>
+                <td>BTS-0411 (LAC:1209)</td>
+                <td>Jakarta Barat</td>
+              </tr>
+              <tr>
+                <td class="td-datetime">16 Aug 2026 07:21:10</td>
+                <td class="td-datetime">16 Aug 2026 07:21:39</td>
+                <td>SMS</td>
+                <td class="td-num">6281893367</td>
+                <td class="td-num">62811501122</td>
+                <td class="td-num">6281893367</td>
+                <td style="color:var(--text-muted);">-</td>
+                <td class="td-mono">356789103456789</td>
+                <td class="td-mono">510100123456789</td>
+                <td>BTS-4431 (LAC:1209)</td>
+                <td>Tangerang</td>
+              </tr>
+              <tr>
+                <td class="td-datetime">16 Aug 2026 23:31:30</td>
+                <td class="td-datetime">16 Aug 2026 23:33:17</td>
+                <td>Voice Call</td>
+                <td class="td-num">62811501122</td>
+                <td class="td-num">62818991358</td>
+                <td class="td-num">62818991358</td>
+                <td style="font-family:var(--mono);">1m 47s</td>
+                <td class="td-mono">356789103456789</td>
+                <td class="td-mono">510100123456789</td>
+                <td>BTS-2056 (LAC:1210)</td>
+                <td>Jakarta Pusat</td>
+              </tr>
+              <tr>
+                <td class="td-datetime">15 Aug 2026 07:21:09</td>
+                <td class="td-datetime">15 Aug 2026 07:21:36</td>
+                <td>SMS</td>
+                <td class="td-num">62811501122</td>
+                <td class="td-num">6282536517674</td>
+                <td class="td-num">6282536517674</td>
+                <td style="color:var(--text-muted);">-</td>
+                <td class="td-mono">356789103456789</td>
+                <td class="td-mono">510100123456789</td>
+                <td>BTS-1985 (LAC:2310)</td>
+                <td>Depok</td>
+              </tr>
+              <tr>
+                <td class="td-datetime">15 Aug 2026 02:34:13</td>
+                <td class="td-datetime">15 Aug 2026 02:36:01</td>
+                <td>Voice Call</td>
+                <td class="td-num">628217701220</td>
+                <td class="td-num">6281893367</td>
+                <td class="td-num">6281893367</td>
+                <td style="font-family:var(--mono);">1m 48s</td>
+                <td class="td-mono">356789103456789</td>
+                <td class="td-mono">510100123456789</td>
+                <td>BTS-2318 (LAC:1043)</td>
+                <td>Tangerang</td>
+              </tr>
+              <tr>
+                <td class="td-datetime">15 Aug 2026 01:10:45</td>
+                <td class="td-datetime">15 Aug 2026 01:12:09</td>
+                <td>SMS</td>
+                <td class="td-num">628233367674</td>
+                <td class="td-num">62811501122</td>
+                <td class="td-num">628233367674</td>
+                <td style="color:var(--text-muted);">-</td>
+                <td class="td-mono">356789103456789</td>
+                <td class="td-mono">510100123456789</td>
+                <td>BTS-1577 (LAC:2210)</td>
+                <td>Bekasi</td>
+              </tr>
+              <tr>
+                <td class="td-datetime">15 Aug 2026 18:26:11</td>
+                <td class="td-datetime">15 Aug 2026 18:42:49</td>
+                <td>Voice Call</td>
+                <td class="td-num">6282536517674</td>
+                <td class="td-num">62811501122</td>
+                <td class="td-num">6282536517674</td>
+                <td style="font-family:var(--mono);">16m 38s</td>
+                <td class="td-mono">356789103456789</td>
+                <td class="td-mono">510100123456789</td>
+                <td>BTS-1577 (LAC:2210)</td>
+                <td>Bekasi</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="search_logic.js"></script>
+  <script>
+    // Render Bar Chart
+    function renderTimelineBars() {
+      const container = document.querySelector('#bars-container');
+      if (!container) return;
+
+      const timeSlots = ['00:00', '02:00', '04:00', '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'];
+      const data = [
+        { voice: 25, sms: 15, other: 10 },
+        { voice: 20, sms: 10, other: 5 },
+        { voice: 30, sms: 15, other: 8 },
+        { voice: 45, sms: 25, other: 12 },
+        { voice: 65, sms: 40, other: 18 },
+        { voice: 80, sms: 50, other: 22 },
+        { voice: 70, sms: 45, other: 20 },
+        { voice: 60, sms: 35, other: 15 },
+        { voice: 75, sms: 50, other: 25 },
+        { voice: 90, sms: 60, other: 30 },
+        { voice: 55, sms: 35, other: 18 },
+        { voice: 40, sms: 20, other: 12 }
+      ];
+
+      container.innerHTML = timeSlots.map((time, i) => {
+        const d = data[i];
+        return `
+          <div class="time-group">
+            <div class="bars-pair">
+              <div class="bar voice" style="height: ${d.voice}%;"></div>
+              <div class="bar sms" style="height: ${d.sms}%;"></div>
+              <div class="bar other" style="height: ${d.other}%;"></div>
+            </div>
+            <span class="time-label">${time}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Dynamic content adaptation per search query
+    function updateCellularContent() {
+      const input = document.querySelector('#search-input');
+      const query = (input ? input.value : '').trim().toLowerCase();
+
+      const totalCalls = document.querySelector('#val-total-calls');
+      const totalSms = document.querySelector('#val-total-sms');
+      const totalDuration = document.querySelector('#val-total-duration');
+      const uniqueBts = document.querySelector('#val-unique-bts');
+      const lastActivity = document.querySelector('#val-last-activity');
+
+      if (query.includes('ismail') || query.includes('3273092008106277')) {
+        if (totalCalls) totalCalls.textContent = '42';
+        if (totalSms) totalSms.textContent = '19';
+        if (totalDuration) totalDuration.textContent = '5h 45m';
+        if (uniqueBts) uniqueBts.textContent = '6';
+        if (lastActivity) lastActivity.textContent = '15 Aug 2026 06:12 PM';
+      } else if (query.includes('aimana') || query.includes('3273092510920002') || query.includes('6287781085549')) {
+        if (totalCalls) totalCalls.textContent = '84';
+        if (totalSms) totalSms.textContent = '32';
+        if (totalDuration) totalDuration.textContent = '12h 15m';
+        if (uniqueBts) uniqueBts.textContent = '9';
+        if (lastActivity) lastActivity.textContent = '16 Aug 2026 11:40 AM';
+      } else {
+        if (totalCalls) totalCalls.textContent = '128';
+        if (totalSms) totalSms.textContent = '47';
+        if (totalDuration) totalDuration.textContent = '19h 30m';
+        if (uniqueBts) uniqueBts.textContent = '14';
+        if (lastActivity) lastActivity.textContent = '16 Aug 2026 02:01 PM';
+      }
+    }
+
+    setupDynamicSearch('.search-group', '#search-input', '#search-type-select', '#btn-search');
+    renderTimelineBars();
+    updateCellularContent();
+  </script>
+</body>
+</html>

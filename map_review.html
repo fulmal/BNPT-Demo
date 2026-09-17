@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Map Review – +6281297228579 | BNPT Intelligence Platform</title>
+  <meta name="description" content="Map Review & Cell Tower lokasi nomor +6281297228579 – BNPT Intelligence Platform." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="profile.css" />
+  <style>
+    /* ── MAP REVIEW PAGE ─────────────────────────── */
+    .map-page {
+      margin-left: var(--sidebar-w);
+      min-height: calc(100vh - var(--topbar-h) - var(--tabs-h));
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Filter bar */
+    .filter-bar {
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: rgba(16,19,28,0.6);
+    }
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .filter-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      min-width: 120px;
+      flex-shrink: 0;
+    }
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .filter-chip.active {
+      background: rgba(0,200,160,0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .filter-chip.inactive {
+      background: rgba(255,255,255,0.04);
+      border-color: var(--border-bright);
+      color: var(--text-secondary);
+    }
+    .filter-chip.inactive:hover {
+      background: rgba(255,255,255,0.07);
+      color: var(--text-primary);
+    }
+    .date-group { display: flex; align-items: center; gap: 8px; }
+    .date-input-wrap {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius);
+      padding: 5px 10px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .date-input-wrap:hover { border-color: rgba(0,200,160,0.35); color: var(--text-secondary); }
+    .date-sep { color: var(--text-muted); font-size: 12px; }
+    .btn-refresh-date {
+      background: var(--bg-card);
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius);
+      color: var(--text-muted);
+      display: flex; align-items: center; padding: 6px;
+      cursor: pointer; transition: all 0.15s ease;
+    }
+    .btn-refresh-date:hover { border-color: rgba(0,200,160,0.35); color: var(--accent); }
+
+    /* Map Container */
+    .map-container {
+      position: relative;
+      flex: 1;
+      min-height: 360px;
+      background: #0c1220;
+      border-bottom: 1px solid var(--border);
+    }
+
+    #leaflet-map {
+      width: 100%;
+      height: 440px;
+    }
+
+    /* Map Controls Overlay */
+    .map-controls {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      pointer-events: none;
+    }
+    .map-ctrl-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 12px 4px;
+      pointer-events: auto;
+    }
+    .map-ctrl-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      border: 1px solid transparent;
+      font-family: var(--font);
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .map-ctrl-btn.active {
+      background: rgba(0,200,160,0.2);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .map-ctrl-btn.inactive {
+      background: rgba(16,20,30,0.9);
+      border-color: rgba(255,255,255,0.15);
+      color: var(--text-secondary);
+      backdrop-filter: blur(8px);
+    }
+    .map-ctrl-btn.inactive:hover {
+      background: rgba(255,255,255,0.07);
+      color: var(--text-primary);
+      border-color: var(--border-bright);
+    }
+    .map-ctrl-sep {
+      width: 1px; height: 20px;
+      background: rgba(255,255,255,0.1);
+      margin: 0 2px;
+    }
+
+    /* Zone info overlay */
+    .zone-info {
+      position: absolute;
+      top: 92px; left: 12px;
+      background: rgba(12,18,34,0.92);
+      border: 1px solid rgba(0,200,160,0.35);
+      border-radius: 7px;
+      padding: 8px 12px;
+      z-index: 1000;
+      pointer-events: none;
+    }
+    .zone-info-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .zone-info-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      font-family: var(--mono);
+      letter-spacing: 0.04em;
+    }
+
+    /* Coords bar */
+    .coords-bar {
+      position: absolute;
+      bottom: 0; left: 0;
+      background: rgba(10,14,22,0.88);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      border-right: 1px solid rgba(255,255,255,0.06);
+      border-radius: 0 6px 0 0;
+      padding: 5px 12px;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      color: var(--text-muted);
+      z-index: 1000;
+      letter-spacing: 0.05em;
+    }
+    .coords-bar span { color: var(--text-primary); margin: 0 2px; }
+
+    /* Map Zoom Controls */
+    .map-zoom-controls {
+      position: absolute;
+      top: 12px; right: 12px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .map-zoom-btn {
+      width: 28px; height: 28px;
+      background: rgba(14,20,34,0.94);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 5px;
+      color: var(--text-secondary);
+      font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .map-zoom-btn:hover { background: rgba(0,200,160,0.15); color: var(--accent); border-color: rgba(0,200,160,0.4); }
+    .map-zoom-btn.pin-btn {
+      background: rgba(201,162,39,0.15);
+      border-color: rgba(201,162,39,0.4);
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+    .map-fullscreen {
+      width: 28px; height: 28px;
+      background: rgba(14,20,34,0.94);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 5px;
+      color: var(--text-secondary);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: all 0.15s ease;
+    }
+    .map-fullscreen:hover { color: var(--accent); border-color: rgba(0,200,160,0.4); }
+
+    /* ── MAP PREVIEW TABLE ──────────────────────── */
+    .map-preview-section {
+      padding: 0 20px 24px;
+    }
+    .map-preview-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+      padding: 14px 0 10px;
+      letter-spacing: 0.02em;
+    }
+    .map-preview-title .count {
+      color: var(--accent);
+    }
+
+    .preview-table-wrap {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+    }
+    .preview-table thead tr {
+      background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid var(--border);
+    }
+    .preview-table th {
+      text-align: left;
+      padding: 8px 10px;
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+    .preview-table tbody tr {
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.15s ease;
+      cursor: pointer;
+    }
+    .preview-table tbody tr:last-child { border-bottom: none; }
+    .preview-table tbody tr:hover { background: rgba(0,200,160,0.05); }
+    .preview-table td {
+      padding: 9px 10px;
+      color: var(--text-secondary);
+      vertical-align: middle;
+    }
+    .preview-table .td-no {
+      color: var(--text-muted);
+      font-size: 11px;
+      width: 32px;
+    }
+    .preview-table .td-dt {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+    .preview-table .td-coord {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      color: var(--text-primary);
+    }
+    .preview-table .td-op {
+      font-weight: 600;
+      color: #e2001a;
+    }
+    .preview-table .td-rat {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: #4da6ff;
+      background: rgba(77,166,255,0.1);
+      border: 1px solid rgba(77,166,255,0.2);
+      border-radius: 3px;
+      padding: 1px 5px;
+      display: inline-block;
+    }
+    .preview-table .td-prov {
+      color: var(--text-secondary);
+      font-size: 10.5px;
+    }
+    .preview-table .td-bold {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* Leaflet overrides */
+    .leaflet-control-zoom { display: none !important; }
+    .leaflet-control-attribution { display: none !important; }
+    .leaflet-tile-pane { filter: none; }
+  </style>
+</head>
+<body>
+
+  <!-- ───────────────── TOPBAR ───────────────── -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="logo-wrap" style="cursor: pointer;" onclick="window.location.href='search.html'">
+        <div class="logo-emblem">
+          <img src="images/bnpt_logo.png" alt="BNPT Logo" style="width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 0 4px rgba(226,0,26,0.3));" />
+        </div>
+      </div>
+    </div>
+
+    <div class="topbar-search">
+      <button class="btn-back" onclick="window.location.href='search.html'">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M8.5 1L3 6.5l5.5 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back to results
+      </button>
+      <div class="search-group active">
+        <select class="search-type-select" id="search-type-select" aria-label="Search Type">
+          <option value="name">Name</option>
+          <option value="phone" selected>Phone Number</option>
+          <option value="kk">KK Number</option>
+        </select>
+        <div class="search-input-wrap">
+          <svg class="search-icon" width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M9.5 9.5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input type="text" id="search-input" class="search-input" value="+6281293949502" placeholder="Search phone number..." />
+        </div>
+        <button class="btn-search" id="btn-search">SEARCH</button>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <div class="retrieval-info">
+        <span class="retrieval-label">Retrieved on</span>
+        <span class="retrieval-date">Aug 15, 2026, 05:30 PM</span>
+      </div>
+      <button class="btn-fullscreen" id="btn-fullscreen" onclick="toggleFullScreen()" title="Fullscreen Mode (F11)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+        </svg>
+        <span class="fs-text">Fullscreen</span>
+      </button>
+      <button class="btn-export">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v7M4 5.5l2.5 2.5 2.5-2.5M1 10.5v.5a1 1 0 001 1h9a1 1 0 001-1v-.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Export Data
+      </button>
+    </div>
+  </header>
+
+  <!-- ───────────────── MAIN TABS ───────────────── -->
+  <nav class="tab-nav" role="navigation">
+    <div class="tab-nav-inner">
+      <button class="tab-btn" onclick="window.location.href='profile_phone.html'">Profile Overview</button>
+      <button class="tab-btn" onclick="window.location.href='index.html'">Family Card</button>
+      <button class="tab-btn" onclick="window.location.href='phone_detail.html'">Phone Detail</button>
+      <button class="tab-btn active" id="tab-map">Map Review</button>
+      <button class="tab-btn" onclick="window.location.href='cellular_history.html'">Cellular History</button>
+      <button class="tab-btn" onclick="window.location.href='whatsapp_detail.html'">WhatsApp Detail</button>
+      <button class="tab-btn" onclick="window.location.href='data_usage.html'">Data Usage Activities</button>
+      <button class="tab-btn" onclick="window.location.href='link_analysis.html'">Link Analysis</button>
+      <button class="tab-btn" onclick="window.location.href='ai_analysis.html'">AI Analysis</button>
+    </div>
+    <div class="secure-badge">
+      <span class="pulse-dot"></span>
+      SECURE TELEMETRY LINKED
+    </div>
+  </nav>
+
+  <!-- ───────────────── LAYOUT ───────────────── -->
+  <div style="padding-top: calc(var(--topbar-h) + var(--tabs-h)); display:flex; min-height:100vh;">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <button class="sidebar-icon active" title="Search">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="7.5" cy="7.5" r="5" stroke="currentColor" stroke-width="1.6"/><path d="M12 12l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <button class="sidebar-icon" title="Folders">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 5a1 1 0 011-1h5l1.5 2H15a1 1 0 011 1v7a1 1 0 01-1 1H3a1 1 0 01-1-1V5z" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+      <button class="sidebar-icon" title="Analytics">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="9" width="4" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="7" y="5" width="4" height="11" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="12" y="2" width="4" height="14" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+      <button class="sidebar-icon" title="Reports">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 2h7l4 4v10a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5"/><path d="M11 2v4h4M6 9h6M6 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="sidebar-spacer"></div>
+      <button class="sidebar-icon" title="Help">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M9 10v1M9 7a2 2 0 110 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <button class="sidebar-icon" title="Settings">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M9 1v2M9 15v2M1 9h2M15 9h2M3.22 3.22l1.42 1.42M13.36 13.36l1.42 1.42M3.22 14.78l1.42-1.42M13.36 4.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </aside>
+
+    <!-- MAIN MAP CONTENT -->
+    <div class="map-page">
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <div class="filter-row">
+          <span class="filter-label">DATASET SOURCE</span>
+          <div class="filter-chip active">Provider Dataset</div>
+          <div class="filter-chip inactive">Telco Dataset v2</div>
+          <div class="filter-chip inactive">Telco Dataset v1</div>
+        </div>
+        <div class="filter-row">
+          <span class="filter-label">TEMPORAL SCOPE</span>
+          <div class="date-group">
+            <div class="date-input-wrap">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="2" width="10" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 1v2M8 1v2M1 5h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              DD/MM/YYYY
+            </div>
+            <span class="date-sep">to</span>
+            <div class="date-input-wrap">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="2" width="10" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 1v2M8 1v2M1 5h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              DD/MM/YYYY
+            </div>
+            <button class="btn-refresh-date">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1.5 6.5A5 5 0 1011 6.5M1.5 4v2.5h2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAP CONTAINER -->
+      <div class="map-container" id="map-container">
+
+        <!-- Map Controls Row 1 -->
+        <div class="map-controls">
+          <div class="map-ctrl-row">
+            <button class="map-ctrl-btn active" id="ctrl-reported">REPORTED</button>
+            <button class="map-ctrl-btn inactive" id="ctrl-celltower">
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><circle cx="5.5" cy="5.5" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M1.5 9.5c1-1.5 2.5-2.5 4-2.5s3 1 4 2.5M2.5 8c.8-1 1.8-1.5 3-1.5s2.2.5 3 1.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+              CELL TOWER
+            </button>
+            <div class="map-ctrl-sep"></div>
+            <button class="map-ctrl-btn active" id="ctrl-2d">2D</button>
+            <button class="map-ctrl-btn inactive" id="ctrl-3d">3D</button>
+            <div class="map-ctrl-sep"></div>
+            <button class="map-ctrl-btn inactive" id="ctrl-satellite">
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><rect x="1" y="1" width="9" height="9" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M1 4h9M1 7h9M4 1v9M7 1v9" stroke="currentColor" stroke-width="1" opacity="0.5"/></svg>
+              SATELLITE
+            </button>
+            <button class="map-ctrl-btn inactive" id="ctrl-grid">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+            </button>
+          </div>
+          <div class="map-ctrl-row">
+            <button class="map-ctrl-btn active" id="ctrl-path">PATH</button>
+            <button class="map-ctrl-btn inactive" id="ctrl-radius">RADIUS</button>
+            <button class="map-ctrl-btn inactive" id="ctrl-triangulation">TRIANGULATION</button>
+            <button class="map-ctrl-btn inactive" id="ctrl-geofence">GEOFENCE</button>
+          </div>
+        </div>
+
+        <!-- Zone Info Overlay -->
+        <div class="zone-info">
+          <div class="zone-info-title">1 zone detected</div>
+          <div class="zone-info-sub">STATIONARY 0m / BTS hopping</div>
+        </div>
+
+        <!-- Leaflet Map -->
+        <div id="leaflet-map"></div>
+
+        <!-- Coordinates bar -->
+        <div class="coords-bar" id="coords-bar">
+          <span>-6.21435</span> | <span>106.92513</span> | <span>215.8</span>
+        </div>
+
+        <!-- Custom Zoom Controls -->
+        <div class="map-zoom-controls">
+          <button class="map-zoom-btn pin-btn" title="Pin" onclick="focusMarker()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1a4 4 0 014 4c0 3-4 8-4 8S3 8 3 5a4 4 0 014-4z" stroke="currentColor" stroke-width="1.4"/><circle cx="7" cy="5" r="1.5" stroke="currentColor" stroke-width="1.2"/></svg>
+          </button>
+          <button class="map-zoom-btn" onclick="mapInstance.zoomIn()">+</button>
+          <button class="map-zoom-btn" onclick="mapInstance.zoomOut()">−</button>
+          <button class="map-fullscreen" title="Fullscreen" onclick="toggleFullscreen()">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1 5V1h4M8 1h4v4M12 8v4H8M5 12H1V8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+
+      </div><!-- /map-container -->
+
+      <!-- MAP PREVIEW TABLE -->
+      <div class="map-preview-section">
+        <div class="map-preview-title">MAP PREVIEW <span class="count">(3)</span></div>
+        <div class="preview-table-wrap">
+          <table class="preview-table">
+            <thead>
+              <tr>
+                <th>NO</th>
+                <th>DATE TIME</th>
+                <th>TOWER LAT</th>
+                <th>TOWER LNG</th>
+                <th>REPORTED LAT</th>
+                <th>REPORTED LNG</th>
+                <th>OPERATOR</th>
+                <th>RAT</th>
+                <th>PROVINCE</th>
+                <th>CITY</th>
+                <th>DISTRICT</th>
+                <th>VILLAGE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr onclick="flyToRow(-6.213731, 106.924577)">
+                <td class="td-no">1</td>
+                <td class="td-dt">2026-08-15 15:58:12</td>
+                <td class="td-coord">-6.213731</td>
+                <td class="td-coord">106.924577</td>
+                <td class="td-coord">-6.213731</td>
+                <td class="td-coord">106.924577</td>
+                <td class="td-op">Telkomsel</td>
+                <td><span class="td-rat">4G</span></td>
+                <td class="td-prov">DKI JAKARTA</td>
+                <td class="td-bold">JAKARTA TIMUR</td>
+                <td>JAKARTA TIMUR-CAKUNG</td>
+                <td>KEL. CAKUNG TIMUR-CAKUNG</td>
+              </tr>
+              <tr onclick="flyToRow(-6.213731, 106.924577)">
+                <td class="td-no">2</td>
+                <td class="td-dt">2026-08-15 15:58:41</td>
+                <td class="td-coord">-6.213731</td>
+                <td class="td-coord">106.924577</td>
+                <td class="td-coord">-6.213731</td>
+                <td class="td-coord">106.924577</td>
+                <td class="td-op">Telkomsel</td>
+                <td><span class="td-rat">4G</span></td>
+                <td class="td-prov">DKI JAKARTA</td>
+                <td class="td-bold">JAKARTA TIMUR</td>
+                <td>JAKARTA TIMUR-CAKUNG</td>
+                <td>KEL. CAKUNG TIMUR-CAKUNG</td>
+              </tr>
+              <tr onclick="flyToRow(-6.21435, 106.92513)">
+                <td class="td-no">3</td>
+                <td class="td-dt">2026-08-15 14:02:30</td>
+                <td class="td-coord">-6.214350</td>
+                <td class="td-coord">106.925130</td>
+                <td class="td-coord">-6.214350</td>
+                <td class="td-coord">106.925130</td>
+                <td class="td-op">Telkomsel</td>
+                <td><span class="td-rat">4G</span></td>
+                <td class="td-prov">DKI JAKARTA</td>
+                <td class="td-bold">JAKARTA TIMUR</td>
+                <td>JAKARTA TIMUR-CAKUNG</td>
+                <td>KEL. CAKUNG TIMUR-CAKUNG</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /map-page -->
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="search_logic.js"></script>
+  <script>
+    // ── Dynamic Search ────────────────────────
+    setupDynamicSearch('.search-group', '#search-input', '#search-type-select', '#btn-search');
+
+    // ── Target Coordinates (Jakarta Timur - Cakung) ──
+    const TARGET_LAT = -6.21435;
+    const TARGET_LNG = 106.92513;
+
+    // ── Init Leaflet Map ──────────────────────
+    const mapInstance = L.map('leaflet-map', {
+      center: [TARGET_LAT, TARGET_LNG],
+      zoom: 14,
+      zoomControl: false,
+      attributionControl: false
+    });
+
+    // Tile Layers (Esri Dark Gray - Clean dark map without watermarks)
+    const darkBaseLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 16,
+      attribution: ''
+    });
+    const darkRefLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 16,
+      attribution: ''
+    });
+    const darkTileLayer = L.layerGroup([darkBaseLayer, darkRefLayer]);
+
+    const satelliteTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 18,
+      attribution: ''
+    });
+
+    const streetTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 18,
+      attribution: ''
+    });
+
+    // Default layer: Dark tiles
+    darkTileLayer.addTo(mapInstance);
+    let currentTileLayer = darkTileLayer;
+
+    // ── Custom Markers & Overlays ──────────────
+    const orangeIcon = L.divIcon({
+      html: `<div style="
+        width: 18px; height: 18px;
+        background: #f59e0b;
+        border: 3px solid rgba(245,158,11,0.6);
+        border-radius: 50%;
+        box-shadow: 0 0 16px rgba(245,158,11,0.9), 0 0 4px rgba(245,158,11,1);
+        position: relative;
+      ">
+        <div style="
+          position: absolute;
+          inset: -8px;
+          border-radius: 50%;
+          border: 1.5px solid rgba(245,158,11,0.4);
+          animation: pulse-ring 1.8s ease-out infinite;
+        "></div>
+      </div>`,
+      className: '',
+      iconSize: [18, 18],
+      iconAnchor: [9, 9]
+    });
+
+    const mainMarker = L.marker([TARGET_LAT, TARGET_LNG], { icon: orangeIcon }).addTo(mapInstance);
+    mainMarker.bindPopup(`
+      <div style="font-family: Inter, sans-serif; font-size: 12px; color: #000; padding: 2px;">
+        <strong style="color: #e2001a;">Telkomsel 4G BTS</strong><br/>
+        Jakarta Timur - Cakung<br/>
+        <span style="font-size: 10px; color: #555;">-6.214350, 106.925130</span>
+      </div>
+    `);
+
+    // Secondary marker
+    const orangeIcon2 = L.divIcon({
+      html: `<div style="
+        width: 12px; height: 12px;
+        background: #38bdf8;
+        border: 2px solid rgba(56,189,248,0.6);
+        border-radius: 50%;
+        box-shadow: 0 0 10px rgba(56,189,248,0.8);
+      "></div>`,
+      className: '',
+      iconSize: [12, 12],
+      iconAnchor: [6, 6]
+    });
+    const secondaryMarker = L.marker([-6.213731, 106.924577], { icon: orangeIcon2 }).addTo(mapInstance);
+    secondaryMarker.bindPopup(`
+      <div style="font-family: Inter, sans-serif; font-size: 12px; color: #000; padding: 2px;">
+        <strong style="color: #0284c7;">Point 2 (Tower 4G)</strong><br/>
+        Kel. Cakung Timur<br/>
+        <span style="font-size: 10px; color: #555;">-6.213731, 106.924577</span>
+      </div>
+    `);
+
+    // ── Polyline Path ─────────────────────────
+    const pathLine = L.polyline([
+      [-6.21435, 106.92513],
+      [-6.213731, 106.924577]
+    ], {
+      color: '#f59e0b',
+      weight: 2.5,
+      dashArray: '6 4',
+      opacity: 0.8
+    }).addTo(mapInstance);
+
+    // ── Radius Circles ─────────────────────────
+    const outerCircle = L.circle([TARGET_LAT, TARGET_LNG], {
+      radius: 350,
+      color: '#f59e0b',
+      fillColor: '#f59e0b',
+      fillOpacity: 0.08,
+      weight: 1.5,
+      dashArray: '6 4',
+      opacity: 0.6
+    }).addTo(mapInstance);
+
+    const innerCircle = L.circle([TARGET_LAT, TARGET_LNG], {
+      radius: 120,
+      color: '#f59e0b',
+      fillColor: '#f59e0b',
+      fillOpacity: 0.2,
+      weight: 1,
+      opacity: 0.7
+    }).addTo(mapInstance);
+
+    // ── Coordinates display on mouse move ─────
+    mapInstance.on('mousemove', function(e) {
+      const bar = document.getElementById('coords-bar');
+      if (bar) {
+        bar.innerHTML = `<span>${e.latlng.lat.toFixed(5)}</span> | <span>${e.latlng.lng.toFixed(5)}</span> | <span>215.8m</span>`;
+      }
+    });
+
+    // ── Helper Functions ──────────────────────
+    function focusMarker() {
+      mapInstance.flyTo([TARGET_LAT, TARGET_LNG], 15, { duration: 0.8 });
+    }
+
+    function flyToRow(lat, lng) {
+      mapInstance.flyTo([lat, lng], 16, { duration: 0.6 });
+    }
+
+    function toggleFullscreen() {
+      const el = document.getElementById('map-container');
+      if (!document.fullscreenElement) {
+        el.requestFullscreen && el.requestFullscreen();
+      } else {
+        document.exitFullscreen && document.exitFullscreen();
+      }
+    }
+
+    // ── Control Button Handler ────────────────
+    document.querySelectorAll('.map-ctrl-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const id = this.id;
+
+        // View modes: 2D vs 3D vs Satellite
+        if (id === 'ctrl-2d') {
+          document.querySelectorAll('#ctrl-2d, #ctrl-3d, #ctrl-satellite').forEach(b => b.classList.replace('active','inactive'));
+          this.classList.replace('inactive','active');
+          mapInstance.removeLayer(currentTileLayer);
+          darkTileLayer.addTo(mapInstance);
+          currentTileLayer = darkTileLayer;
+        } else if (id === 'ctrl-satellite') {
+          document.querySelectorAll('#ctrl-2d, #ctrl-3d, #ctrl-satellite').forEach(b => b.classList.replace('active','inactive'));
+          this.classList.replace('inactive','active');
+          mapInstance.removeLayer(currentTileLayer);
+          satelliteTileLayer.addTo(mapInstance);
+          currentTileLayer = satelliteTileLayer;
+        } else if (id === 'ctrl-3d') {
+          document.querySelectorAll('#ctrl-2d, #ctrl-3d, #ctrl-satellite').forEach(b => b.classList.replace('active','inactive'));
+          this.classList.replace('inactive','active');
+          mapInstance.removeLayer(currentTileLayer);
+          streetTileLayer.addTo(mapInstance);
+          currentTileLayer = streetTileLayer;
+        }
+
+        // Overlay Toggles
+        if (id === 'ctrl-path') {
+          const isActive = this.classList.contains('active');
+          this.classList.toggle('active', !isActive);
+          this.classList.toggle('inactive', isActive);
+          if (isActive) mapInstance.removeLayer(pathLine);
+          else pathLine.addTo(mapInstance);
+        }
+
+        if (id === 'ctrl-radius') {
+          const isActive = this.classList.contains('active');
+          this.classList.toggle('active', !isActive);
+          this.classList.toggle('inactive', isActive);
+          if (isActive) {
+            mapInstance.removeLayer(outerCircle);
+            mapInstance.removeLayer(innerCircle);
+          } else {
+            outerCircle.addTo(mapInstance);
+            innerCircle.addTo(mapInstance);
+          }
+        }
+      });
+    });
+
+    // Pulse animation CSS injection
+    const styleEl = document.createElement('style');
+    styleEl.textContent = `
+      @keyframes pulse-ring {
+        0%   { transform: scale(0.8); opacity: 0.8; }
+        100% { transform: scale(3);   opacity: 0; }
+      }
+    `;
+    document.head.appendChild(styleEl);
+  </script>
+</body>
+</html>

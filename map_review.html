@@ -483,7 +483,7 @@
             </button>
           </div>
           <div class="map-ctrl-row">
-            <button class="map-ctrl-btn active" id="ctrl-path">PATH</button>
+            <button class="map-ctrl-btn inactive" id="ctrl-path">PATH</button>
             <button class="map-ctrl-btn inactive" id="ctrl-radius">RADIUS</button>
             <button class="map-ctrl-btn inactive" id="ctrl-triangulation">TRIANGULATION</button>
             <button class="map-ctrl-btn inactive" id="ctrl-geofence">GEOFENCE</button>
@@ -649,13 +649,13 @@
 
     markerGroup.addTo(mapInstance);
 
-    // Connected Polyline Trajectory Path
+    // Optional Polyline Path (Not added by default as points stand independently)
     const pathLine = L.polyline(pathCoords, {
       color: '#f59e0b',
       weight: 2.5,
       dashArray: '6 4',
       opacity: 0.85
-    }).addTo(mapInstance);
+    });
 
     // Coverage Radius Circle around Primary Target
     const outerCircle = L.circle(currentData.points[0].lat ? [currentData.points[0].lat, currentData.points[0].lng] : currentData.center, {
@@ -677,8 +677,8 @@
       opacity: 0.7
     }).addTo(mapInstance);
 
-    // Auto-fit map to show all 5 markers nicely
-    mapInstance.fitBounds(pathLine.getBounds().pad(0.25));
+    // Auto-fit map to show all 5 independent markers
+    mapInstance.fitBounds(markerGroup.getBounds().pad(0.25));
 
     // Render 5 Rows in Preview Table
     const tbody = document.getElementById('map-preview-tbody');
